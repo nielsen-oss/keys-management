@@ -107,11 +107,12 @@ def test_on_exit_decrypted_state__with_symmetric_key_store_keys_were_set():
     state.set_keys_store(key_store)
     assert state.opposite_state._decrypt_key is None
     state.on_enter()
+    expected_decrypt_key = state._decrypt_key
     assert state._is_entered is True
     assert state._encrypt_key is not None
-    assert state._decrypt_key is not None
+    assert expected_decrypt_key is not None
     state.on_exit()
-    assert state.opposite_state._decrypt_key == state._decrypt_key
+    assert state.opposite_state._decrypt_key == expected_decrypt_key
     assert state._is_entered is False
     assert state._encrypt_key is None
     assert state._decrypt_key is None
@@ -123,11 +124,12 @@ def test_on_exit_decrypted_state__with_asymmetric_key_store_keys_were_set():
     state.set_keys_store(key_store)
     assert state.opposite_state._decrypt_key is None
     state.on_enter()
+    expected_decrypt_key = state._decrypt_key
     assert state._is_entered is True
     assert state._encrypt_key is not None
-    assert state._decrypt_key is not None
+    assert expected_decrypt_key is not None
     state.on_exit()
-    assert state.opposite_state._decrypt_key == state._decrypt_key
+    assert state.opposite_state._decrypt_key == expected_decrypt_key
     assert state._is_entered is False
 
 

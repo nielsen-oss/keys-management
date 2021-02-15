@@ -94,8 +94,8 @@ class DecryptedState(KeyState):
         super(DecryptedState, self).__init__(opposite_state)
 
     def on_exit(self) -> None:
-        super(DecryptedState, self).on_exit()
         self._opposite_state._decrypt_key = self._decrypt_key
+        super(DecryptedState, self).on_exit()
 
     def get_key(self) -> Key:
         logger.debug('get key')
