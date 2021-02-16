@@ -1,8 +1,10 @@
 from typing import Optional, Dict, Union, List
-from keys_management import KeysManagementInterface, StateRepoInterface, CryptoTool, KeysStore, KeyIsNotDefinedError, \
+from . import KeysManagementInterface, StateRepoInterface, CryptoTool, KeysStore, KeyIsNotDefinedError, \
     Key, OnChange
-from keys_management.state import StateFactory, UnknownState, KeyState
-from keys_management.consts import KEEP_STATE, STATE, KEYS_STORE, ON_CHANGES_CALLBACKS
+from .key_state import KeyState
+from .key_state.state_factory import StateFactory
+from .key_state.unknown_state import UnknownState
+from .consts import KEEP_STATE, STATE, KEYS_STORE, ON_CHANGES_CALLBACKS
 import logging
 
 
