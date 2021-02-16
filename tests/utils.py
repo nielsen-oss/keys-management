@@ -1,4 +1,6 @@
-from keys_management.state import UnknownState, DecryptedState, EncryptedState
+from keys_management.key_state.unknown_state import UnknownState
+from keys_management.key_state.decrypted_state import DecryptedState
+from keys_management.key_state.encrypted_state import EncryptedState
 
 
 def create_unknown_state() -> UnknownState:

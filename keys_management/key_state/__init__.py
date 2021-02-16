@@ -1,0 +1,85 @@
+from __future__ import annotations
+from typing import Optional
+from abc import ABC, abstractmethod
+import logging
+from keys_management import Key, KeysStore
+from keys_management.consts import ENCRYPTION_KEY_TYPE, DECRYPTION_KEY_TYPE, PUBLIC_KEY_TYPE, PRIVATE_KEY_TYPE
+
+logger = logging.getLogger(__name__)
+
+
+class KeyState(ABC):
+    _keys_store: KeysStore = None
+    _encrypt_key: Optional[Key] = None
+    _decrypt_key: Optional[Key] = None
+
+    def __init__(self, opposite_state: KeyState = None):
+        logger.debug('init state')
+        self._opposite_state = opposite_state
+        self._is_entered = False
+
+    def on_enter(self) -> None:
+        logger.debug('on enter')
+        self._set_keys_from_store()
+        self._is_entered = True
+
+    def _set_keys_from_store(self) -> None:
+        if not isinstance(self._keys_store, KeysStore):
+            raise UndefinedOperationError('set keys from key', 'keys store is not callable')
+        logger.debug('setting keys from keys store')
+        keys = self._keys_store()
+        if isinstance(keys, (str, bytes)):
+            self._encrypt_key = keys
+            self._decrypt_key = keys
+        elif isinstance(keys, dict):
+            self._encrypt_key = keys[ENCRYPTION_KEY_TYPE] if ENCRYPTION_KEY_TYPE in keys else keys.get(PUBLIC_KEY_TYPE, None)
+            self._decrypt_key = keys[DECRYPTION_KEY_TYPE] if DECRYPTION_KEY_TYPE in keys else keys.get(PRIVATE_KEY_TYPE, None)
+        elif isinstance(keys, tuple):
+            self._encrypt_key, self._decrypt_key = keys
+
+    def on_exit(self) -> None:
+        logger.debug('on exit')
+        self._encrypt_key = None
+        self._decrypt_key = None
+        self._is_entered = False
+
+    @abstractmethod
+    def is_use_for_encrypt(self) -> bool:
+        pass
+
+    @abstractmethod
+    def get_key(self) -> Key:
+        pass
+
+    def _validate_can_get_key(self):
+        logger.debug('validate_can_get_key while %s' % self._is_entered)
+        if self._is_entered is False:
+            raise UndefinedOperationError('get_key', 'not entered first')
+
+    @property
+    def opposite_state(self) -> KeyState:
+        return self._opposite_state
+
+    @opposite_state.setter
+    def opposite_state(self, state):
+        self._opposite_state = state
+
+    @abstractmethod
+    def set_keys_store(self, key_store: KeysStore) -> None:
+        pass
+
+    @property
+    @abstractmethod
+    def name(self):
+        pass
+
+
+class UndefinedOperationError(RuntimeError):
+    def __init__(self, operation, reason):
+        self.operation = operation
+        self.reason = reason
+
+
+
+
+
