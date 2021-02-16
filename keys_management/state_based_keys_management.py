@@ -1,10 +1,14 @@
-from typing import Optional, Dict, Union
+from typing import Optional, Dict, Union, List
 from keys_management import KeysManagementInterface, StateRepoInterface, CryptoTool, KeysStore, KeyIsNotDefinedError, \
     Key, OnChange
 from keys_management.state import StateFactory, UnknownState, KeyState
-from keys_management.consts import KEEP_STATE, STATE, KEYS_STORE
+from keys_management.consts import KEEP_STATE, STATE, KEYS_STORE, ON_CHANGES_CALLBACKS
+import logging
 
-Keys = Dict[str, Dict[str, Union[bool, KeyState, KeysStore]]]
+
+logger = logging.getLogger(__name__)
+
+Keys = Dict[str, Dict[str, Union[bool, KeyState, KeysStore, List[OnChange]]]]
 
 
 class KeysManagementStateBased(KeysManagementInterface):
@@ -18,22 +22,29 @@ class KeysManagementStateBased(KeysManagementInterface):
         self.keys = {}
 
     def define_key(self, key_name: str, initial_keys_store: KeysStore, keep_state: bool = False) -> KeysManagementInterface:
+        logger.info('Defining the key "%s"' % key_name)
         initial_state: KeyState = UnknownState()
         self.keys[key_name] = {
             KEEP_STATE: keep_state,
             STATE: initial_state,
-            KEYS_STORE: initial_keys_store
+            KEYS_STORE: initial_keys_store,
+            ON_CHANGES_CALLBACKS: []
         }
         return self
 
     def get_key(self, key_name: str, is_for_encrypt: bool = None) -> Key:
-        if key_name not in self.keys:
-            raise KeyIsNotDefinedError(key_name)
+        logger.info('requested to get key for "%s"' % key_name)
+        self.validate_key_name(key_name)
         current_state: KeyState = self.get_state(key_name)
+        logger.debug('current state for "{}" is "{}"'.format(key_name, current_state.name))
         rv_key: Key = current_state.get_key()
         if self.should_change_state(current_state, is_for_encrypt):
             self._change_state(key_name, current_state)
         return rv_key
+
+    def validate_key_name(self, key_name):
+        if key_name not in self.keys:
+            raise KeyIsNotDefinedError(key_name)
 
     @staticmethod
     def should_change_state(current_state: KeyState, is_for_encrypt: bool = None) -> bool:
@@ -58,13 +69,18 @@ class KeysManagementStateBased(KeysManagementInterface):
 
     def _change_state(self, key_name: str, current_state: KeyState) -> KeysManagementInterface:
         opposite_state: KeyState = current_state.opposite_state
+        logger.debug('going to change the key state for "{}" from "{}" to "{}"'.format(key_name, current_state.name, opposite_state.name))
         opposite_state.on_enter()
         current_state.on_exit()
         self.keys[key_name][STATE] = opposite_state
         return self
 
     def key_changed(self, key_name: str, old_key: Key, new_key: Key, new_key_store: Optional[KeysStore] = None):
-        pass
+        logger.info('the key "{}" is changed, registered callbacks will be executed'.format(key_name))
+        for callback in self.keys[key_name][ON_CHANGES_CALLBACKS]:
+            callback(old_key, new_key)
 
     def on_change(self, key_name: str, on_change_func: OnChange):
-        pass
+        logger.info('registering new OnChange callback for "%s"' % key_name)
+        self.validate_key_name(key_name)
+        self.keys[key_name][ON_CHANGES_CALLBACKS].append(on_change_func)

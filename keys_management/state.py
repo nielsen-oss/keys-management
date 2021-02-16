@@ -68,6 +68,11 @@ class KeyState(ABC):
     def set_keys_store(self, key_store: KeysStore) -> None:
         pass
 
+    @property
+    @abstractmethod
+    def name(self):
+        pass
+
 
 class UnknownState(KeyState):
     def __init__(self):
@@ -88,6 +93,10 @@ class UnknownState(KeyState):
     def set_keys_store(self, key_store: KeysStore) -> None:
         raise UndefinedOperationError('set_keys_store', 'in UnknownState')
 
+    @property
+    def name(self):
+        return 'UnknownState'
+
 
 class DecryptedState(KeyState):
     def __init__(self, opposite_state: KeyState = None):
@@ -107,6 +116,10 @@ class DecryptedState(KeyState):
 
     def set_keys_store(self, key_store: KeysStore) -> None:
         self._keys_store = key_store
+
+    @property
+    def name(self):
+        return 'DecryptedState'
 
 
 class EncryptedState(KeyState):
@@ -132,6 +145,10 @@ class EncryptedState(KeyState):
 
     def set_keys_store(self, keys_store: KeysStore) -> None:
         self._opposite_state.set_keys_store(keys_store)
+
+    @property
+    def name(self):
+        return 'EncryptedState'
 
 
 class UndefinedOperationError(RuntimeError):
