@@ -73,8 +73,8 @@ class KeysManagementStateBased(KeysManagement):
         raw_state = self.crypto_tool.decrypt(self.state_repo.read_state(key_name))
         return StateFactory.create_state(raw_state[STATE], keys_store, raw_state.get(KEY, None))
 
-    def _write_state(self, key_name: str) -> None:
-        self.state_repo.write_state(key_name, {STATE: self.keys[key_name].__name__})
+    def _write_state(self, key_name: str, state: Dict) -> None:
+        self.state_repo.write_state(key_name, self.crypto_tool.encrypt(state))
 
     def _change_state(self, key_name: str, current_state: KeyState) -> KeysManagement:
         opposite_state: KeyState = current_state.get_opposite_state()
@@ -93,3 +93,13 @@ class KeysManagementStateBased(KeysManagement):
         logger.info('registering new OnChange callback for "%s"' % key_name)
         self._validate_key_name(key_name)
         self.keys[key_name][ON_CHANGES_CALLBACKS].append(on_change_func)
+
+    def save_state(self, key_name: str):
+        self._validate_key_name(key_name)
+        raw_state = self.keys[key_name][STATE].to_dict()
+        self._write_state(key_name, raw_state)
+
+    def save_states(self):
+        for key, item in self.keys.items():
+            if item[KEEP_STATE]:
+                self.save_state(key)

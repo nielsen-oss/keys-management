@@ -1,8 +1,15 @@
+from typing import Dict
+
 from . import KeyState, UndefinedOperationError
 from .. import Key, KeysStore
-
+from ..consts import STATE
 
 class UnknownState(KeyState):
+    def to_dict(self) -> Dict:
+        return {
+            STATE: 'unknown'
+        }
+
     def set_key(self, key):
         raise UndefinedOperationError('set_key', 'in UnknownState')
 

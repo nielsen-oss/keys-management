@@ -1,11 +1,19 @@
 import logging
+from typing import Dict
+
 from . import KeyState, KeysStore, UndefinedOperationError
 from .. import Key
+from ..consts import STATE, DECRYPTED_STATE
 
 logger = logging.getLogger(__name__)
 
 
 class DecryptedState(KeyState):
+    def to_dict(self) -> Dict:
+        return {
+            STATE: DECRYPTED_STATE
+        }
+
     def __init__(self, opposite_state: KeyState = None):
         super(DecryptedState, self).__init__(opposite_state)
 

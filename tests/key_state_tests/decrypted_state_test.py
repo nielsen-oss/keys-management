@@ -2,7 +2,7 @@ import pytest
 from ..utils import create_decrypted_state, create_symmetry_key_store, create_asymmetric_key_store
 from keys_management.key_state import UndefinedOperationError
 from keys_management.key_state.encrypted_state import EncryptedState
-from keys_management.consts import ENCRYPTION_KEY_TYPE, DECRYPTION_KEY_TYPE
+from keys_management.consts import ENCRYPTION_KEY_TYPE, DECRYPTION_KEY_TYPE, STATE, DECRYPTED_STATE
 
 
 @pytest.fixture
@@ -108,3 +108,6 @@ class TestDecryptedState:
         decrypted_state.set_keys_store(symmetry_key_store)
         assert decrypted_state._keys_store == symmetry_key_store
         assert decrypted_state.get_opposite_state()._keys_store is None
+
+    def test_to_dict_(self, decrypted_state):
+        assert decrypted_state.to_dict() == {STATE: DECRYPTED_STATE}

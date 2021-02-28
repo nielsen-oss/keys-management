@@ -1,4 +1,5 @@
 from keys_management.key_state import UndefinedOperationError
+from keys_management.consts import STATE
 import pytest
 from ..utils import create_unknown_state, create_symmetry_key_store
 
@@ -36,3 +37,6 @@ class TestUnknownState:
     def test_set_keys_store__error_is_raised(self, unknown_state, key_store):
         with pytest.raises(UndefinedOperationError):
             unknown_state.set_keys_store(key_store)
+
+    def test_to_dict_(self, unknown_state):
+        assert unknown_state.to_dict() == {STATE:'unknown'}

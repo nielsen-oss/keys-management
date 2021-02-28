@@ -273,6 +273,33 @@ class TestKeysManagementStateBased:
         first_on_change_mock.assert_called_once_with(old_key, new_key)
         second_on_change_mock.assert_called_once_with(old_key, new_key)
 
+    def test_save_states(self, keys_management: KeysManagementStateBased, stated_key_def: KeyDef, stateless_key_def: KeyDef,  mocked_state_repo: StateRepoInterface, mocked_crypto_tool: CryptoTool):
+        # arrange
+        mocked_crypto_tool.decrypt.side_effect = lambda data: data
+        mocked_crypto_tool.encrypt.side_effect = lambda data: data
+
+        def read_state(key_name):
+            if key_name == stated_key_def.name:
+                return {
+                    STATE: DECRYPTED_STATE,
+                    KEY: stated_key_def.keys['decrypt']
+                }
+
+        mocked_state_repo.read_state.side_effect = read_state
+
+
+        keys_management.get_key(stated_key_def.name)
+        keys_management.get_key(stateless_key_def.name)
+        current_state = keys_management.keys[stated_key_def.name][STATE].to_dict()
+
+        # act
+        keys_management.save_states()
+
+        # assert
+        mocked_state_repo.write_state.assert_called_once_with(stated_key_def.name, current_state)
+        mocked_crypto_tool.encrypt.assert_called_once_with(current_state)
+
+
 
 @fixture
 def mocked_state_repo(mocker: MockerFixture) -> StateRepoInterface:

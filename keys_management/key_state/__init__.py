@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Dict
 from abc import ABC, abstractmethod
 import logging
 from keys_management import Key, KeysStore
@@ -82,6 +82,10 @@ class KeyState(ABC):
 
     def set_decrypt_key(self, key):
         self._decrypt_key = key
+
+    @abstractmethod
+    def to_dict(self) -> Dict:
+        pass
 
 
 class UndefinedOperationError(RuntimeError):
