@@ -3,14 +3,17 @@ from .. import Key, KeysStore
 
 
 class UnknownState(KeyState):
+    def set_key(self, key):
+        raise UndefinedOperationError('set_key', 'in UnknownState')
+
     def __init__(self):
         super().__init__(None)
 
-    def on_enter(self) -> None:
-        raise UndefinedOperationError('on_enter', 'in UnknownState')
+    def enter(self) -> None:
+        raise UndefinedOperationError('enter', 'in UnknownState')
 
-    def on_exit(self) -> None:
-        raise UndefinedOperationError('on_exit', 'in UnknownState')
+    def exit(self) -> None:
+        raise UndefinedOperationError('exit', 'in UnknownState')
 
     def is_use_for_encrypt(self) -> bool:
         raise UndefinedOperationError('is_use_for_encrypt', 'in UnknownState')
@@ -21,6 +24,5 @@ class UnknownState(KeyState):
     def set_keys_store(self, key_store: KeysStore) -> None:
         raise UndefinedOperationError('set_keys_store', 'in UnknownState')
 
-    @property
-    def name(self):
+    def get_name(self) -> str:
         return 'UnknownState'

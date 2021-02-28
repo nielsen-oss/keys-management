@@ -10,16 +10,16 @@ def create_unknown_state() -> UnknownState:
 def create_decrypted_state() -> DecryptedState:
     decrypted_state = DecryptedState()
     encrypted_state = EncryptedState()
-    decrypted_state.opposite_state = encrypted_state
-    encrypted_state.opposite_state = decrypted_state
+    decrypted_state.set_opposite_state(encrypted_state)
+    encrypted_state.set_opposite_state(decrypted_state)
     return decrypted_state
 
 
 def create_encrypted_state() -> EncryptedState:
     decrypted_state = DecryptedState()
     encrypted_state = EncryptedState()
-    decrypted_state.opposite_state = encrypted_state
-    encrypted_state.opposite_state = decrypted_state
+    decrypted_state.set_opposite_state(encrypted_state)
+    encrypted_state.set_opposite_state(decrypted_state)
     return encrypted_state
 
 

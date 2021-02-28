@@ -1,5 +1,5 @@
 import logging
-from . import KeyState, KeysStore
+from . import KeyState, KeysStore, UndefinedOperationError
 from .. import Key
 
 logger = logging.getLogger(__name__)
@@ -9,9 +9,12 @@ class DecryptedState(KeyState):
     def __init__(self, opposite_state: KeyState = None):
         super(DecryptedState, self).__init__(opposite_state)
 
-    def on_exit(self) -> None:
-        self._opposite_state._decrypt_key = self._decrypt_key
-        super(DecryptedState, self).on_exit()
+    def exit(self) -> None:
+        self._opposite_state.set_key(self._decrypt_key)
+        super(DecryptedState, self).exit()
+
+    def set_key(self, key):
+        pass
 
     def get_key(self) -> Key:
         logger.debug('get key')
@@ -24,6 +27,5 @@ class DecryptedState(KeyState):
     def set_keys_store(self, key_store: KeysStore) -> None:
         self._keys_store = key_store
 
-    @property
-    def name(self):
+    def get_name(self) -> str:
         return 'DecryptedState'
