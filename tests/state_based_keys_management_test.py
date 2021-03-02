@@ -1,9 +1,10 @@
 from typing import Tuple
-from pytest import raises, fixture
+from pytest import raises, fixture, mark
 from pytest_mock import MockerFixture
 from keys_management import CryptoTool, StateRepoInterface, KeysStore, KeysManagement
-from keys_management.state_based_keys_management import KeysManagementStateBased, UnknownState, KeyIsNotDefinedError, StateFactory
+from keys_management.state_based_keys_management import KeysManagementStateBased, UnknownState, KeyIsNotDefinedError, SecretKeyDefinition
 from keys_management.consts import *
+from keys_management.secret_key import SecretKey
 from keys_management.key_state import UndefinedOperationError, KeyState
 from keys_management.key_state.decrypted_state import DecryptedState
 from keys_management.key_state.encrypted_state import EncryptedState
@@ -17,13 +18,12 @@ class TestKeysManagementStateBased:
         # act
         empty_keys_management.define_key(key_name, keys_store)
         # assert
-        defined_key = empty_keys_management.keys[key_name]
+        defined_key: SecretKeyDefinition = empty_keys_management.key_definitions[key_name]
         assert defined_key is not None
-        assert defined_key[KEEP_STATE] is not None
         patched_unknown_state.assert_called_once()
-        assert defined_key[STATE] is not None and defined_key[STATE] is patched_unknown_state()
-        assert defined_key[KEYS_STORE] == keys_store
-        assert defined_key[ON_CHANGES_CALLBACKS] is not None and len(defined_key[ON_CHANGES_CALLBACKS]) == 0
+        assert defined_key.state is not None and defined_key.state is patched_unknown_state()
+        assert defined_key.keys_store == keys_store
+        assert defined_key.on_change_callbacks is not None and len(defined_key.on_change_callbacks) == 0
         keys_store.assert_not_called()
         assert len(mocked_state_repo.method_calls) == 0
         assert len(mocked_crypto_tool.method_calls) == 0
@@ -46,7 +46,7 @@ class TestKeysManagementStateBased:
         mock_decrypted_state.enter.assert_called_once()
         mock_decrypted_state.exit.assert_called_once()
         mock_encrypted_state.enter.assert_called_once()
-        assert keys_management.keys[stateless_key_def.name][STATE].get_name() is 'EncryptedState'
+        assert keys_management.key_definitions[stateless_key_def.name].state.get_name() is 'EncryptedState'
         mock_encrypted_state.exit.assert_not_called()
         mocked_state_repo.read_state.assert_not_called()
         mocked_state_repo.write_state.assert_not_called()
@@ -64,7 +64,7 @@ class TestKeysManagementStateBased:
         patched_state_factory.create_state.assert_not_called()
         mock_encrypted_state.exit.assert_called_once()
         mock_decrypted_state.enter.assert_called_once()
-        assert keys_management.keys[stateless_key_def.name][STATE].get_name() is 'DecryptedState'
+        assert keys_management.key_definitions[stateless_key_def.name].state.get_name() is 'DecryptedState'
         mocked_state_repo.read_state.assert_not_called()
         mocked_state_repo.write_state.assert_not_called()
 
@@ -89,7 +89,7 @@ class TestKeysManagementStateBased:
         # assert
         mocked_state_repo.read_state.assert_called_once_with(stated_key_def.name)
         patched_state_factory.create_state.assert_called_once_with(invalid_state, stated_key_def.keys_store, stated_key_def.keys['decrypt'])
-        assert keys_management.keys[stated_key_def.name][STATE].get_name() is 'UnknownState'
+        assert keys_management.key_definitions[stated_key_def.name].state.get_name() is 'UnknownState'
         mock_decrypted_state.enter.assert_not_called()
         mock_decrypted_state.exit.assert_not_called()
         mock_encrypted_state.enter.assert_not_called()
@@ -115,7 +115,7 @@ class TestKeysManagementStateBased:
         # assert
         mocked_state_repo.read_state.assert_called_once_with(stated_key_def.name)
         patched_state_factory.create_state.assert_called_once_with(invalid_state, stated_key_def.keys_store, None)
-        assert keys_management.keys[stated_key_def.name][STATE].get_name() is 'UnknownState'
+        assert keys_management.key_definitions[stated_key_def.name].state.get_name() is 'UnknownState'
         mock_decrypted_state.enter.assert_not_called()
         mock_decrypted_state.exit.assert_not_called()
         mock_encrypted_state.enter.assert_not_called()
@@ -143,7 +143,7 @@ class TestKeysManagementStateBased:
         mock_decrypted_state.enter.assert_called_once()
         mock_decrypted_state.exit.assert_called_once()
         mock_encrypted_state.enter.assert_called_once()
-        assert keys_management.keys[stated_key_def.name][STATE].get_name() is 'EncryptedState'
+        assert keys_management.key_definitions[stated_key_def.name].state.get_name() is 'EncryptedState'
         mock_encrypted_state.exit.assert_not_called()
         mocked_state_repo.write_state.assert_not_called()
 
@@ -161,7 +161,7 @@ class TestKeysManagementStateBased:
         patched_state_factory.create_state.assert_not_called()
         mock_encrypted_state.exit.assert_called_once()
         mock_decrypted_state.enter.assert_called_once()
-        assert keys_management.keys[stated_key_def.name][STATE].get_name() is 'DecryptedState'
+        assert keys_management.key_definitions[stated_key_def.name].state.get_name() is 'DecryptedState'
         mocked_state_repo.read_state.assert_not_called()
         mocked_state_repo.write_state.assert_not_called()
 
@@ -187,7 +187,7 @@ class TestKeysManagementStateBased:
         mocked_state_repo.read_state.assert_called_once_with(stated_key_def.name)
         mock_encrypted_state.enter.assert_called_once()
         mock_encrypted_state.exit.assert_called_once()
-        assert keys_management.keys[stated_key_def.name][STATE].get_name() is 'DecryptedState'
+        assert keys_management.key_definitions[stated_key_def.name].state.get_name() is 'DecryptedState'
         mock_decrypted_state.enter.assert_called_once()
         mocked_state_repo.write_state.assert_not_called()
 
@@ -205,7 +205,7 @@ class TestKeysManagementStateBased:
         patched_state_factory.create_state.assert_not_called()
         mock_decrypted_state.exit.assert_called_once()
         mock_encrypted_state.enter.assert_called_once()
-        assert keys_management.keys[stated_key_def.name][STATE].get_name() is 'EncryptedState'
+        assert keys_management.key_definitions[stated_key_def.name].state.get_name() is 'EncryptedState'
         mocked_state_repo.read_state.assert_not_called()
         mocked_state_repo.write_state.assert_not_called()
 
@@ -217,7 +217,7 @@ class TestKeysManagementStateBased:
 
         #arrange
         keys_management.get_key(stateless_key_def.name)
-        assert keys_management.keys[stateless_key_def.name][STATE].get_name() is 'EncryptedState'
+        assert keys_management.key_definitions[stateless_key_def.name].state.get_name() is 'EncryptedState'
         patched_state_factory.reset_mock()
         mock_decrypted_state.reset_mock()
         mock_encrypted_state.reset_mock()
@@ -236,7 +236,7 @@ class TestKeysManagementStateBased:
         patched_state_factory.create_state.assert_not_called()
         mock_encrypted_state.exit.assert_called_once()
         mock_decrypted_state.enter.assert_called_once()
-        assert keys_management.keys[stateless_key_def.name][STATE].get_name() is 'DecryptedState'
+        assert keys_management.key_definitions[stateless_key_def.name].state.get_name() is 'DecryptedState'
         mocked_state_repo.read_state.assert_not_called()
         mocked_state_repo.write_state.assert_not_called()
 
@@ -256,14 +256,14 @@ class TestKeysManagementStateBased:
 
     def test_on_change_invalid_key(self, keys_management: KeysManagement, not_defined_key_name: str):
         with raises(KeyIsNotDefinedError):
-            keys_management.on_change(not_defined_key_name, lambda n, o: n)
+            keys_management.register_on_change(not_defined_key_name, lambda n, o: n)
 
     def test_on_change__with_key_changed(self, keys_management: KeysManagement, stated_key_def: KeyDef, mocker: MockerFixture):
         first_on_change_mock = mocker.MagicMock()
         second_on_change_mock = mocker.MagicMock()
 
-        keys_management.on_change(stated_key_def.name, first_on_change_mock)
-        keys_management.on_change(stated_key_def.name, second_on_change_mock)
+        keys_management.register_on_change(stated_key_def.name, first_on_change_mock)
+        keys_management.register_on_change(stated_key_def.name, second_on_change_mock)
 
         old_key = "old_key"
         new_key = "new_key"
@@ -290,7 +290,7 @@ class TestKeysManagementStateBased:
 
         keys_management.get_key(stated_key_def.name)
         keys_management.get_key(stateless_key_def.name)
-        current_state = keys_management.keys[stated_key_def.name][STATE].to_dict()
+        current_state = keys_management.key_definitions[stated_key_def.name].state.to_dict()
 
         # act
         keys_management.save_states()
@@ -298,7 +298,6 @@ class TestKeysManagementStateBased:
         # assert
         mocked_state_repo.write_state.assert_called_once_with(stated_key_def.name, current_state)
         mocked_crypto_tool.encrypt.assert_called_once_with(current_state)
-
 
 
 @fixture
@@ -361,7 +360,7 @@ def patched_state_factory(mocker: MockerFixture, mocked_states):
         if state_name in {ENCRYPTED_STATE, DECRYPTED_STATE}:
             rv_state = mocked_decrypted_state if state_name == DECRYPTED_STATE else mocked_encrypted_state
             rv_state.set_keys_store(keys_store)
-            rv_state.set_key(key)
+            rv_state.set_key(SecretKey(key))
             return rv_state
         else:
             raise UndefinedOperationError('create_state', 'the state name "%s" is not defined' % state_name)
@@ -402,7 +401,7 @@ def stated_key_def(stated_key_name, stated_key) -> KeyDef:
 
 @fixture
 def keys_management(empty_keys_management: KeysManagement, stateless_key_def: KeyDef, stated_key_def: KeyDef):
-    return empty_keys_management.define_key(stateless_key_def.name, stateless_key_def.keys_store, False).define_key(stated_key_def.name, stated_key_def.keys_store, True)
+    return empty_keys_management.define_key(stateless_key_def.name, stateless_key_def.keys_store, True).define_key(stated_key_def.name, stated_key_def.keys_store, False)
 
 
 @fixture

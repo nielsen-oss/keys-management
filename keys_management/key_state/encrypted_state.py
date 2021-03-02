@@ -1,38 +1,39 @@
 import logging
-from typing import Dict
-
-from . import KeyState, KeysStore, UndefinedOperationError
-from .. import Key
+from typing import Optional, Dict
+from . import KeyState, UndefinedOperationError
+from .. import KeysStore
 from ..consts import STATE, ENCRYPTED_STATE, KEY
+from ..secret_key import SecretKey
 
 logger = logging.getLogger(__name__)
 
 
 class EncryptedState(KeyState):
+    _decrypt_key: Optional[SecretKey]
+
+    def __init__(self, opposite_state: KeyState = None):
+        super(EncryptedState, self).__init__(opposite_state)
+        self._decrypt_key = None
+
+    def _concrete_enter(self) -> None:
+        if not self._decrypt_key:
+            raise UndefinedOperationError('enter', 'decrypt key is not defined')
+
     def to_dict(self) -> Dict:
         return {
             STATE: ENCRYPTED_STATE,
             KEY: self.get_key()
         }
 
-    def __init__(self, opposite_state: KeyState = None):
-        super(EncryptedState, self).__init__(opposite_state)
-
-    def set_key(self, key):
+    def set_key(self, key: SecretKey):
         if key is None:
             raise UndefinedOperationError("set_key", "cannot set None key in EncryptedState")
-        self.set_decrypt_key(key)
+        self._decrypt_key = key
 
-    def enter(self) -> None:
-        logger.debug('on enter')
-        if not self._decrypt_key:
-            raise UndefinedOperationError('enter', 'decrypt key is not defined')
-        self._is_entered = True
+    def _concrete_exit(self) -> None:
+        self._decrypt_key = None
 
-    def exit(self) -> None:
-        super(EncryptedState, self).exit()
-
-    def get_key(self) -> Key:
+    def get_key(self) -> SecretKey:
         logger.debug('get key')
         self._validate_can_get_key()
         return self._decrypt_key

@@ -1,23 +1,23 @@
 from __future__ import annotations
-from typing import Callable, Optional, Dict, Union, Tuple, Any
+from typing import Callable, Optional, Any, Union, Dict
+from .secret_key import SecretKeyValue, SecretKeyPairValues
 
-Key = str
-KeysStore = Callable[[], Union[str, Tuple[str, str], Dict[str, str]]]
-OnChange = Callable[[str, str], None]
-KeysPair = Dict[str, Key]
+
+KeysStore = Callable[[], SecretKeyPairValues]
+OnChange = Callable[[Union[SecretKeyPairValues], Union[SecretKeyPairValues]], None]
 
 
 class KeysManagement(object):
-    def define_key(self, key_name: str, keys_store: KeysStore, keep_state: bool = False) -> KeysManagement:
+    def define_key(self, key_name: str, keys_store: KeysStore, is_stateless: bool = True) -> KeysManagement:
         raise NotImplementedError()
 
-    def get_key(self, key_name: str, is_for_encrypt: bool = None) -> Key:
+    def get_key(self, key_name: str, is_for_encrypt: bool = None) -> SecretKeyValue:
         raise NotImplementedError()
 
-    def key_changed(self, key_name: str, old_key: Key, new_key: Key, new_key_store: Optional[KeysStore] = None) -> None:
+    def key_changed(self, key_name: str, old_keys: SecretKeyPairValues, new_keys: SecretKeyPairValues, new_key_store: Optional[KeysStore] = None) -> None:
         raise NotImplementedError()
 
-    def on_change(self, key_name: str, on_change_func: OnChange) -> None:
+    def register_on_change(self, key_name: str, on_change_func: OnChange) -> None:
         raise NotImplementedError()
 
 

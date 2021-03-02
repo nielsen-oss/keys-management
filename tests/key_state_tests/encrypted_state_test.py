@@ -3,7 +3,7 @@ from ..utils import create_encrypted_state, create_symmetry_key_store
 from keys_management.key_state import UndefinedOperationError
 from keys_management.key_state.decrypted_state import DecryptedState
 from keys_management.consts import STATE, ENCRYPTED_STATE, KEY
-
+from keys_management.secret_key import SecretKey
 
 @pytest.fixture
 def encrypted_state():
@@ -40,10 +40,9 @@ class TestEncryptedState:
         assert encrypted_state.get_key() == expected_key
 
     def test_on_exit(self, encrypted_state):
-        encrypted_state._decrypt_key = 'key'
+        encrypted_state._decrypt_key = SecretKey('key123')
         encrypted_state.enter()
         encrypted_state.exit()
-        assert encrypted_state.get_opposite_state()._decrypt_key == encrypted_state._decrypt_key
         assert encrypted_state._is_entered is False
         assert encrypted_state._decrypt_key is None
 
@@ -55,9 +54,9 @@ class TestEncryptedState:
         assert encrypted_state.get_opposite_state().get_opposite_state() == encrypted_state
 
     def test_set_keys_store(self, encrypted_state, key_store):
+        assert encrypted_state.get_opposite_state()._keys_store is None
         encrypted_state.set_keys_store(key_store)
-        assert encrypted_state._keys_store is None
-        assert encrypted_state.get_opposite_state()._keys_store == key_store
+        assert encrypted_state.get_opposite_state()._keys_store is not None
 
     def test_to_dict_(self, encrypted_state, key_store):
         expected_key = key_store()
