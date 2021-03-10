@@ -1,9 +1,9 @@
 from typing import Dict
 
 from . import KeyState, UndefinedOperationError
-from .. import KeysStore
-from ..consts import STATE
-from ..secret_key import SecretKey, SecretKeyValue
+from keys_management import KeysStore
+from keys_management.consts import STATE
+from keys_management.secret_key import SecretKey, SecretKeyValue
 
 
 class UnknownState(KeyState):
@@ -22,8 +22,8 @@ class UnknownState(KeyState):
     def set_key(self, key: SecretKey):
         raise UndefinedOperationError('set_key', 'in UnknownState')
 
-    def is_use_for_encrypt(self) -> bool:
-        raise UndefinedOperationError('is_use_for_encrypt', 'in UnknownState')
+    def get_use_case(self) -> bool:
+        raise UndefinedOperationError('get_use_case', 'in UnknownState')
 
     def get_key(self) -> SecretKeyValue:
         raise UndefinedOperationError('get_key', 'in UnknownState')

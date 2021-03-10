@@ -1,20 +1,25 @@
 from __future__ import annotations
-from typing import Callable, Optional, Any, Union, Dict
-from .secret_key import SecretKeyValue, SecretKeyPairValues
+from typing import Callable, Any, Union, Dict
+from .secret_key import SecretKeyValue, SecretKeyPairValues, KeysStore, SecretKeyUseCase, OnChangeKeyDefinition
 
 
-KeysStore = Callable[[], SecretKeyPairValues]
-OnChange = Callable[[Union[SecretKeyPairValues], Union[SecretKeyPairValues]], None]
+OnChange = Callable[[Union[SecretKeyPairValues], Union[SecretKeyPairValues], OnChangeKeyDefinition], None]
 
 
 class KeysManagement(object):
-    def define_key(self, key_name: str, keys_store: KeysStore, is_stateless: bool = True) -> KeysManagement:
+    def define_key(self, name: str, keys_store: KeysStore, is_stateless: bool, use_case: SecretKeyUseCase, target_data_accessible: bool, keep_in_cache: bool) -> KeysManagement:
         raise NotImplementedError()
 
-    def get_key(self, key_name: str, is_for_encrypt: bool = None) -> SecretKeyValue:
+    def get_key(self, key_name: str, purpose: SecretKeyUseCase) -> SecretKeyValue:
         raise NotImplementedError()
 
-    def key_changed(self, key_name: str, old_keys: SecretKeyPairValues, new_keys: SecretKeyPairValues, new_key_store: Optional[KeysStore] = None) -> None:
+    def get_encrypt_key(self, key_name: str) -> SecretKeyValue:
+        return self.get_key(key_name, SecretKeyUseCase.ENCRYPTION)
+
+    def get_decrypt_key(self, key_name: str) -> SecretKeyValue:
+        return self.get_key(key_name, SecretKeyUseCase.DECRYPTION)
+
+    def key_changed(self, key_name: str, old_keys: SecretKeyPairValues, new_keys: SecretKeyPairValues) -> None:
         raise NotImplementedError()
 
     def register_on_change(self, key_name: str, on_change_func: OnChange) -> None:

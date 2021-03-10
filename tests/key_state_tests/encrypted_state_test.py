@@ -1,9 +1,9 @@
 import pytest
 from ..utils import create_encrypted_state, create_symmetry_key_store
-from keys_management.key_state import UndefinedOperationError
-from keys_management.key_state.decrypted_state import DecryptedState
+from keys_management.state_based.key_state import UndefinedOperationError
+from keys_management.state_based.key_state.decrypted_state import DecryptedState
 from keys_management.consts import STATE, ENCRYPTED_STATE, KEY
-from keys_management.secret_key import SecretKey
+from keys_management.secret_key import SecretKey, SecretKeyUseCase
 
 @pytest.fixture
 def encrypted_state():
@@ -46,8 +46,8 @@ class TestEncryptedState:
         assert encrypted_state._is_entered is False
         assert encrypted_state._decrypt_key is None
 
-    def test_is_use_for_encrypt(self, encrypted_state):
-        assert encrypted_state.is_use_for_encrypt() is False
+    def test_get_use_case(self, encrypted_state):
+        assert encrypted_state.get_use_case() is SecretKeyUseCase.DECRYPTION
 
     def test_opposite_state(self, encrypted_state):
         assert isinstance(encrypted_state.get_opposite_state(), DecryptedState)

@@ -1,9 +1,9 @@
 import logging
 from typing import Optional, Dict
 from . import KeyState, UndefinedOperationError
-from .. import KeysStore
-from ..consts import STATE, ENCRYPTED_STATE, KEY
-from ..secret_key import SecretKey
+from keys_management import KeysStore
+from keys_management.consts import STATE, ENCRYPTED_STATE, KEY
+from keys_management.secret_key import SecretKey, SecretKeyUseCase
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +38,8 @@ class EncryptedState(KeyState):
         self._validate_can_get_key()
         return self._decrypt_key
 
-    def is_use_for_encrypt(self) -> bool:
-        return False
+    def get_use_case(self) -> SecretKeyUseCase:
+        return SecretKeyUseCase.DECRYPTION
 
     def set_keys_store(self, keys_store: KeysStore) -> None:
         self._opposite_state.set_keys_store(keys_store)

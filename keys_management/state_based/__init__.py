@@ -1,55 +1,16 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 import logging
-from . import KeysManagement, StateRepoInterface, CryptoTool, KeysStore, KeyIsNotDefinedError, OnChange
-from .consts import STATE, DECRYPTED_STATE, KEY
-from .key_state import KeyState
-from .key_state.state_factory import StateFactory
-from .key_state.unknown_state import UnknownState
-from .secret_key import SecretKeyPairValues, SecretKeyValue
+from .key_definition import SecretKeyDefinition
+from .consts import DECRYPTED_STATE, AUTHENTICATION_STATE, TEMP_STATE_NAME
+from .. import KeysManagement, StateRepoInterface, CryptoTool, KeysStore, KeyIsNotDefinedError, OnChange
+from ..consts import STATE, KEY
+from ..state_based.key_state import KeyState
+from ..state_based.key_state.state_factory import StateFactory
+from ..state_based.key_state.unknown_state import UnknownState
+from ..secret_key import SecretKeyPairValues, SecretKeyValue, SecretKeyPair, SecretKey, SecretKeyUseCase
 
 
 logger = logging.getLogger(__name__)
-
-
-class SecretKeyDefinition:
-    _name: str
-    _keys_store: KeysStore
-    _is_stateless: bool
-    _current_state: KeyState
-    _on_change_callbacks: List[OnChange]
-
-    def __init__(self, name: str, keys_store: KeysStore, is_stateless: bool):
-        self._name = name
-        self._keys_store = keys_store
-        self._is_stateless = is_stateless
-        self._current_state = UnknownState()
-        self._on_change_callbacks = []
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    def is_stateless(self) -> bool:
-        return self._is_stateless
-
-    def is_stated(self) -> bool:
-        return not self._is_stateless
-
-    @property
-    def state(self) -> KeyState:
-        return self._current_state
-
-    @property
-    def on_change_callbacks(self) -> List[OnChange]:
-        return self._on_change_callbacks
-
-    @property
-    def keys_store(self) -> KeysStore:
-        return self._keys_store
-
-    def change_state(self, new_state: KeyState):
-        self._current_state = new_state
-
 
 KeyDefinitions = Dict[str, SecretKeyDefinition]
 
@@ -64,20 +25,21 @@ class KeysManagementStateBased(KeysManagement):
         self.crypto_tool = crypto_tool
         self.key_definitions = {}
 
-    def define_key(self, key_name: str, initial_keys_store: KeysStore, is_stateless: bool = True) -> KeysManagement:
-        logger.info('Defining the key "%s"' % key_name)
-        self.key_definitions[key_name] = SecretKeyDefinition(key_name, initial_keys_store, is_stateless)
+    def define_key(self, name: str, keys_store: KeysStore, is_stateless: bool, use_case: SecretKeyUseCase, is_target_data_accessible: bool) -> KeysManagement:
+        logger.info('Defining the key "%s"' % name)
+        self.key_definitions[name] = SecretKeyDefinition(name, keys_store, is_stateless, use_case, is_target_data_accessible)
         return self
 
-    def get_key(self, key_name: str, is_for_encrypt: bool = None) -> SecretKeyValue:
+    def get_key(self, key_name: str, purpose: SecretKeyUseCase) -> SecretKeyValue:
         logger.info('requested to get key for "%s"' % key_name)
         self._validate_key_name(key_name)
         current_state: KeyState = self._get_state(key_name)
         logger.debug('current state for "{}" is "{}"'.format(key_name, current_state.get_name()))
-        rv_key: SecretKeyValue = current_state.get_key().get_value()
-        if self._should_change_state(current_state, is_for_encrypt):
+        rv_key: SecretKey = current_state.get_key()
+        logger.debug('rv_key is "%s"', str(rv_key))
+        if self._should_change_state(current_state, purpose):
             self._change_state(key_name, current_state)
-        return rv_key
+        return rv_key.get_value()
 
     def _validate_key_name(self, key_name: str) -> None:
         if key_name not in self.key_definitions:
@@ -93,7 +55,9 @@ class KeysManagementStateBased(KeysManagement):
             return current_state
 
     def _set_known_state(self, key_definition: SecretKeyDefinition) -> None:
-        if key_definition.is_stated():
+        if key_definition.use_case == SecretKeyUseCase.AUTHENTICATION:
+            known_state = StateFactory.create_state(AUTHENTICATION_STATE, key_definition.keys_store)
+        elif key_definition.is_stated():
             known_state = self._fetch_state(key_definition)
         else:
             known_state = StateFactory.create_state(DECRYPTED_STATE, key_definition.keys_store)
@@ -102,11 +66,12 @@ class KeysManagementStateBased(KeysManagement):
 
     def _fetch_state(self, key_definition: SecretKeyDefinition) -> KeyState:
         raw_state = self.crypto_tool.decrypt(self.state_repo.read_state(key_definition.name))
-        return StateFactory.create_state(raw_state[STATE], key_definition.keys_store, raw_state.get(KEY, None))
+        require_state_name = TEMP_STATE_NAME if key_definition.is_target_data_accessible else raw_state[STATE]
+        return StateFactory.create_state(require_state_name, key_definition.keys_store, raw_state.get(KEY, None))
 
     @staticmethod
-    def _should_change_state(current_state: KeyState, is_for_encrypt: bool = None) -> bool:
-        return not isinstance(is_for_encrypt, bool) or current_state.is_use_for_encrypt() == is_for_encrypt
+    def _should_change_state(current_state: KeyState, purpose: SecretKeyUseCase) -> bool:
+        return not isinstance(purpose, SecretKeyUseCase) or current_state.get_use_case() == purpose
 
     def _write_state(self, key_name: str, state: Dict) -> None:
         self.state_repo.write_state(key_name, self.crypto_tool.encrypt(state))
@@ -121,8 +86,9 @@ class KeysManagementStateBased(KeysManagement):
 
     def key_changed(self, key_name: str, old_keys: SecretKeyPairValues, new_keys: SecretKeyPairValues, new_key_store: Optional[KeysStore] = None) -> None:
         if logger.isEnabledFor(logging.DEBUG):
-            pass
-        logger.info('the key "{}" is changed, registered callbacks will be executed'.format(key_name))
+            logger.debug('the key "{}" is changed from {} to {} registered callbacks will be executed'.format(key_name, str(SecretKeyPair(old_keys)), str(SecretKeyPair(new_keys))))
+        else:
+            logger.info('the key "{}" is changed, registered callbacks will be executed'.format(key_name))
         for callback in self.key_definitions[key_name].on_change_callbacks:
             callback(old_keys, new_keys)
 

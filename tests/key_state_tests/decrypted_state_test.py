@@ -1,7 +1,8 @@
 import pytest
 from ..utils import create_decrypted_state, create_symmetry_key_store, create_asymmetric_key_store
-from keys_management.key_state import UndefinedOperationError
-from keys_management.key_state.encrypted_state import EncryptedState
+from keys_management.state_based.key_state import UndefinedOperationError
+from keys_management.secret_key import SecretKeyUseCase
+from keys_management.state_based.key_state.encrypted_state import EncryptedState
 from keys_management.consts import ENCRYPTION_KEY_TYPE, DECRYPTION_KEY_TYPE, STATE, DECRYPTED_STATE
 
 
@@ -26,7 +27,6 @@ def key_store():
 
 
 class TestDecryptedState:
-
     def test_on_enter__without_key_store_error_is_raised(self, decrypted_state):
         with pytest.raises(UndefinedOperationError):
             decrypted_state.enter()
@@ -97,8 +97,8 @@ class TestDecryptedState:
         assert decrypted_state.get_opposite_state()._decrypt_key == expected_decrypt_key
         assert decrypted_state._is_entered is False
 
-    def test_is_use_for_encrypt(self, decrypted_state):
-        assert decrypted_state.is_use_for_encrypt() is True
+    def test_get_use_case(self, decrypted_state):
+        assert decrypted_state.get_use_case() is SecretKeyUseCase.ENCRYPTION
 
     def test_opposite_state(self, decrypted_state):
         assert isinstance(decrypted_state.get_opposite_state(), EncryptedState)

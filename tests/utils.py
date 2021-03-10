@@ -1,6 +1,10 @@
-from keys_management.key_state.unknown_state import UnknownState
-from keys_management.key_state.decrypted_state import DecryptedState
-from keys_management.key_state.encrypted_state import EncryptedState
+from typing import Dict
+
+from keys_management import SecretKeyUseCase
+from keys_management.state_based.key_state import OneState
+from keys_management.state_based.key_state.unknown_state import UnknownState
+from keys_management.state_based.key_state.decrypted_state import DecryptedState
+from keys_management.state_based.key_state.encrypted_state import EncryptedState
 
 
 def create_unknown_state() -> UnknownState:
@@ -21,6 +25,25 @@ def create_encrypted_state() -> EncryptedState:
     decrypted_state.set_opposite_state(encrypted_state)
     encrypted_state.set_opposite_state(decrypted_state)
     return encrypted_state
+
+
+def create_one_state():
+    return StubOneState()
+
+
+class StubOneState(OneState):
+
+    def get_use_case(self) -> SecretKeyUseCase:
+        return SecretKeyUseCase.ENCRYPTION_DECRYPTION
+
+    def get_name(self) -> str:
+        return "OneState"
+
+    def to_dict(self) -> Dict:
+        pass
+
+    def __init__(self):
+        super().__init__()
 
 
 def create_symmetry_key_store():

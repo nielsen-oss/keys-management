@@ -1,4 +1,4 @@
-from keys_management.key_state import UndefinedOperationError
+from keys_management.state_based.key_state import UndefinedOperationError
 from keys_management.consts import STATE
 import pytest
 from ..utils import create_unknown_state, create_symmetry_key_store
@@ -25,7 +25,7 @@ class TestUnknownState:
 
     def test_is_use_for_encrypt__error_is_raised(self, unknown_state):
         with pytest.raises(UndefinedOperationError):
-            unknown_state.is_use_for_encrypt()
+            unknown_state.get_use_case()
 
     def test_get_key__error_is_raised(self, unknown_state):
         with pytest.raises(UndefinedOperationError):
