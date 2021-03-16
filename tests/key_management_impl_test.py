@@ -1,11 +1,14 @@
 from pytest import mark, raises, fixture
-from keys_management import KeysManagement, KeyIsNotDefinedError, StateRepoInterface, CryptoTool
-from keys_management.secret_key import SecretKeyUseCase
-from keys_management.impl import KeysManagementImpl, InvalidKeyStateError
+from keys_management import KeysManagement, KeysManagementImpl, KeyIsNotDefinedError, GetKeyError, StateRepoInterface,\
+    CryptoTool, SecretKeyUseCase, OnChangeKeyDefinition, SecretKeyDefinitionInitError
 from keys_management.consts import KEY, STATE
 from . import KeyDefForTest
+from pytest_mock import MockerFixture
+from unittest.mock import ANY
+import logging
 
 
+@mark.ofek
 class TestDefineKey:
     @staticmethod
     def define_key_test(empty_keys_management: KeysManagement, key_definition: KeyDefForTest, mocked_state_repo,
@@ -69,8 +72,113 @@ class TestDefineKey:
         self.define_key_test(empty_keys_management, DE_not_cached_accessible, mocked_state_repo, mocked_crypto_tool)
 
 
-@mark.ofek
+    def test_define_key_with_invalid_name__name_is_none(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(None, key_definition.keys_store, key_definition.is_stateless(),
+                                             key_definition.use_case,
+                                             key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
+
+    def test_define_key_with_invalid_name__name_is_empty(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key('', key_definition.keys_store, key_definition.is_stateless(),
+                                             key_definition.use_case,
+                                             key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
+
+    def test_define_key_with_invalid_name__name_is_not_str(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(True, key_definition.keys_store, key_definition.is_stateless(),
+                                             key_definition.use_case,
+                                             key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
+
+
+    def test_define_key_with_invalid_keys_store__is_none(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(key_definition.name, None, key_definition.is_stateless(),
+                                             key_definition.use_case,
+                                             key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
+
+
+    def test_define_key_with_invalid_keys_store__is_not_callable(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(key_definition.name, "im_str", key_definition.is_stateless(),
+                                             key_definition.use_case,
+                                             key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
+
+    def test_define_key_with_invalid_keys_store__callable_with_args(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(key_definition.name, lambda a: a, key_definition.is_stateless(),
+                                             key_definition.use_case,
+                                             key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
+
+
+
+    def test_define_key_with_invalid_stateless(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, 'aaa',
+                                             key_definition.use_case,
+                                             key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
+
+    def test_define_key_with_invalid_use_case_is_none(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.is_stateless(),
+                                             None,
+                                             key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
+
+    def test_define_key_with_invalid_use_case_is_not_use_case_type(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.is_stateless(),
+                                             'ENCRYPTION',
+                                             key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
+
+    def test_define_key_with_invalid_target_data_accessible(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.is_stateless(),
+                                             key_definition.use_case,
+                                             "aaa",
+                                             key_definition.is_keep_in_cache())
+
+    def test_define_key_with_invalid_keep_in_cache(self, empty_keys_management: KeysManagement, DE_stated_not_accessible: KeyDefForTest):
+        key_definition = DE_stated_not_accessible
+        # act
+        with raises(SecretKeyDefinitionInitError):
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.is_stateless(),
+                                             key_definition.use_case,
+                                             key_definition.is_target_data_accessible(),
+                                             "aaa")
+
+
+
 class TestGetKey:
+    @mark.ofek
     def test_key_was_not_defined__error_is_raised(self, keys_management: KeysManagement, not_defined_key_name: str,
                                                   mocked_state_repo: StateRepoInterface):
         with raises(KeyIsNotDefinedError):
@@ -88,7 +196,7 @@ class TestGetKey:
                 }
 
         mocked_state_repo.read_state.side_effect = read_state
-        with raises(InvalidKeyStateError):
+        with raises(GetKeyError):
             keys_management.get_decrypt_key(stated_key_def.name)
         mocked_state_repo.read_state.assert_called_once_with(stated_key_def.name)
 
@@ -131,6 +239,60 @@ class TestGetKey:
         mocked_state_repo.read_state.assert_not_called()
 
         stated_key_def.keys_store.assert_called_once()
+
+    def test_determine_purpose_when_last_use_was_encryption(self, keys_management: KeysManagement,
+                                                            stated_key_def: KeyDefForTest,
+                                                            mocked_state_repo: StateRepoInterface):
+        keys_management.get_encrypt_key(stated_key_def.name)
+        mocked_state_repo.reset_mock()
+        assert keys_management.get_key(stated_key_def.name) == stated_key_def.keys['decrypt']
+        mocked_state_repo.read_state.assert_not_called()
+
+    def test_determine_purpose_when_last_use_was_decryption(self, keys_management: KeysManagement,
+                                                            stated_key_def: KeyDefForTest,
+                                                            mocked_state_repo: StateRepoInterface):
+        keys_management.get_encrypt_key(stated_key_def.name)
+        mocked_state_repo.reset_mock()
+        assert keys_management.get_key(stated_key_def.name) == stated_key_def.keys['decrypt']
+        mocked_state_repo.read_state.assert_not_called()
+
+    def test_determine_purpose_stateless_key(self, keys_management: KeysManagement,
+                                                            stateless_key_def: KeyDefForTest,
+                                                            mocked_state_repo: StateRepoInterface):
+        assert keys_management.get_key(stateless_key_def.name) == stateless_key_def.keys['encrypt']
+        mocked_state_repo.read_state.assert_not_called()
+
+    def test_determine_purpose_stated_key_when_state_is_decryption(self, keys_management: KeysManagement,
+                                                            DE_stated_accessible: KeyDefForTest,
+                                                            mocked_state_repo: StateRepoInterface):
+        key_from_state = 'key_from_state'
+
+        def read_state(_key_name):
+            if _key_name == DE_stated_accessible.name:
+                return {
+                    STATE: SecretKeyUseCase.DECRYPTION.name,
+                    KEY: key_from_state
+                }
+
+        mocked_state_repo.read_state.side_effect = read_state
+
+        assert keys_management.get_key(DE_stated_accessible.name) == DE_stated_accessible.keys['encrypt']
+        mocked_state_repo.read_state.assert_called_once_with(DE_stated_accessible.name)
+
+    def test_determine_purpose_stated_key_when_state_is_encryption(self, keys_management: KeysManagement,
+                                                            DE_stated_accessible: KeyDefForTest,
+                                                            mocked_state_repo: StateRepoInterface):
+
+        def read_state(_key_name):
+            if _key_name == DE_stated_accessible.name:
+                return {
+                    STATE: SecretKeyUseCase.ENCRYPTION.name
+                }
+
+        mocked_state_repo.read_state.side_effect = read_state
+
+        assert keys_management.get_key(DE_stated_accessible.name) == DE_stated_accessible.keys['decrypt']
+        mocked_state_repo.read_state.assert_called_once_with(DE_stated_accessible.name)
 
 
 class TestGetKeyEEDDE:
@@ -268,9 +430,9 @@ class TestGetKeyECE:
         self.get_key_ECE_scenario_test(keys_management, DE_stated_not_accessible, mocked_state_repo)
 
     def test_DE_stated_accessible(self, keys_management: KeysManagement,
-                                  DE_stated_not_accessible: KeyDefForTest,
+                                  DE_stated_accessible: KeyDefForTest,
                                   mocked_state_repo: StateRepoInterface):
-        self.get_key_ECE_scenario_test(keys_management, DE_stated_not_accessible, mocked_state_repo)
+        self.get_key_ECE_scenario_test(keys_management, DE_stated_accessible, mocked_state_repo)
 
     def test_DE_stateless_not_accessible(self, keys_management: KeysManagement,
                                          DE_stateless_not_accessible: KeyDefForTest,
@@ -399,6 +561,11 @@ class TestGetKeyDCE:
         self.get_key_DCE_scenario_test(keys_management, DE_not_cached_accessible, mocked_state_repo)
 
 
+# what you each in each test
+# repository cache usage
+# local cache usage according to each use-case
+
+
 class TestGetKeyDCD:
     @staticmethod
     def get_key_DCD_scenario_test(keys_management: KeysManagement, key_definition: KeyDefForTest,
@@ -522,6 +689,58 @@ class TestGetKeyA:
                                                          A_stateless_accessible: KeyDefForTest,
                                                          mocked_state_repo: StateRepoInterface):
         self.get_key_ACA_scenario_test(keys_management, A_stateless_accessible, mocked_state_repo)
+
+
+@mark.ofek
+class TestKeyManagementImpl:
+    def test_on_change_invalid_key(self, keys_management: KeysManagement, not_defined_key_name: str):
+        with raises(KeyIsNotDefinedError):
+            keys_management.register_on_change(not_defined_key_name, lambda n, o: n)
+
+    def test_on_change__with_key_changed(self, keys_management: KeysManagement, stated_key_def: KeyDefForTest,
+                                         mocker: MockerFixture):
+        first_on_change_mock = mocker.MagicMock()
+        second_on_change_mock = mocker.MagicMock()
+
+        keys_management.register_on_change(stated_key_def.name, first_on_change_mock)
+        keys_management.register_on_change(stated_key_def.name, second_on_change_mock)
+
+        old_key = "old_key"
+        new_key = "new_key"
+
+        keys_management.key_changed(stated_key_def.name, old_key, new_key)
+
+        first_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
+        second_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
+
+    def test_save_states(self, keys_management: KeysManagement, stated_key_def: KeyDefForTest,
+                         stateless_key_def: KeyDefForTest, mocked_state_repo: StateRepoInterface,
+                         mocked_crypto_tool: CryptoTool):
+        # arrange
+        mocked_crypto_tool.decrypt.side_effect = lambda data: data
+        mocked_crypto_tool.encrypt.side_effect = lambda data: data
+
+        def read_state(key_name):
+            if key_name == stated_key_def.name:
+                return {
+                    STATE: SecretKeyUseCase.ENCRYPTION.name,
+                    KEY: stated_key_def.keys['decrypt']
+                }
+
+        mocked_state_repo.read_state.side_effect = read_state
+
+        keys_management.get_key(stated_key_def.name)
+        keys_management.get_key(stateless_key_def.name)
+        current_state = keys_management._keys_definitions[stated_key_def.name] = {
+
+        }
+
+        # act
+        keys_management.save_states()
+
+        # assert
+        mocked_state_repo.write_state.assert_called_once_with(stated_key_def.name, current_state)
+        mocked_crypto_tool.encrypt.assert_called_once_with(current_state)
 
 
 @fixture

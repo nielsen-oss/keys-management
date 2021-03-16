@@ -1,10 +1,12 @@
+from __future__ import annotations
 import logging
-from typing import Dict, Optional, Callable
+from typing import Dict, Optional, Callable, TYPE_CHECKING
 from . import KeyState, UndefinedOperationError
-from keys_management import KeysStore, SecretKeyUseCase
+from keys_management import SecretKeyUseCase
 from keys_management.consts import STATE, DECRYPTED_STATE
 from keys_management.secret_key import SecretKey, SecretKeyPair
-
+if TYPE_CHECKING:
+    from keys_management import KeysStore
 logger = logging.getLogger(__name__)
 
 SecretKeyPairStore = Callable[[], SecretKeyPair]

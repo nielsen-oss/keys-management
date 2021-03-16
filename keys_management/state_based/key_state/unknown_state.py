@@ -1,9 +1,10 @@
-from typing import Dict
-
+from __future__ import annotations
+from typing import Dict, TYPE_CHECKING
 from . import KeyState, UndefinedOperationError
-from keys_management import KeysStore
 from keys_management.consts import STATE
-from keys_management.secret_key import SecretKey, SecretKeyValue
+from keys_management.secret_key import SecretKey
+if TYPE_CHECKING:
+    from keys_management.secret_key import SecretKeyValue, KeysStore
 
 
 class UnknownState(KeyState):

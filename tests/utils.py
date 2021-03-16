@@ -1,6 +1,6 @@
 from typing import Dict
 
-from keys_management import SecretKeyUseCase
+from keys_management.secret_key import SecretKeyUseCase
 from keys_management.state_based.key_state import OneState
 from keys_management.state_based.key_state.unknown_state import UnknownState
 from keys_management.state_based.key_state.decrypted_state import DecryptedState

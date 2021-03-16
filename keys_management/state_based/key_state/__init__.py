@@ -1,8 +1,10 @@
 from __future__ import annotations
-from typing import Dict, Callable, Optional
+from typing import Dict, Callable, Optional, TYPE_CHECKING
 from abc import ABC, abstractmethod
 import logging
-from keys_management.secret_key import SecretKey, KeysStore, SecretKeyUseCase
+from keys_management.secret_key import SecretKeyUseCase, SecretKey
+if TYPE_CHECKING:
+    from keys_management.secret_key import KeysStore, SecretKeyUseCase
 
 logger = logging.getLogger(__name__)
 SecretKeyStore = Callable[[], SecretKey]

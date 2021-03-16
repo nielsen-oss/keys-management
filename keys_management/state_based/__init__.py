@@ -1,15 +1,17 @@
-from typing import Optional, Dict
+from __future__ import annotations
+from typing import Optional, Dict, TYPE_CHECKING
 import logging
 from .key_definition import SecretKeyDefinition
 from .consts import DECRYPTED_STATE, AUTHENTICATION_STATE, TEMP_STATE_NAME
-from .. import KeysManagement, StateRepoInterface, CryptoTool, KeysStore, KeyIsNotDefinedError, OnChange
-from ..consts import STATE, KEY
+from .. import KeysManagement, StateRepoInterface, CryptoTool, KeyIsNotDefinedError
+from ..consts import STATE, KEY, DEFINE_KEY_LOG_MESSAGE, GET_KEY_INFO_MESSAGE, LOG_GEY_DEBUG_MESSAGE, KEY_CHANGED_DEBUG_MESSAGE, KEY_CHANGED_INFO_MESSAGE, REGISTER_ON_CHANGE_LOG_MESSAGE
 from ..state_based.key_state import KeyState
 from ..state_based.key_state.state_factory import StateFactory
 from ..state_based.key_state.unknown_state import UnknownState
-from ..secret_key import SecretKeyPairValues, SecretKeyValue, SecretKeyPair, SecretKey, SecretKeyUseCase
-
-
+from ..secret_key import SecretKeyPair, SecretKey, SecretKeyUseCase
+if TYPE_CHECKING:
+    from ..secret_key import SecretKeyPairValues, SecretKeyValue
+    from .. import KeysStore, KeyChangedCallback
 logger = logging.getLogger(__name__)
 
 KeyDefinitions = Dict[str, SecretKeyDefinition]
@@ -26,17 +28,17 @@ class KeysManagementStateBased(KeysManagement):
         self.key_definitions = {}
 
     def define_key(self, name: str, keys_store: KeysStore, is_stateless: bool, use_case: SecretKeyUseCase, is_target_data_accessible: bool) -> KeysManagement:
-        logger.info('Defining the key "%s"' % name)
+        logger.info(DEFINE_KEY_LOG_MESSAGE % name)
         self.key_definitions[name] = SecretKeyDefinition(name, keys_store, is_stateless, use_case, is_target_data_accessible)
         return self
 
     def get_key(self, key_name: str, purpose: SecretKeyUseCase) -> SecretKeyValue:
-        logger.info('requested to get key for "%s"' % key_name)
+        logger.info(GET_KEY_INFO_MESSAGE.format(key_name))
         self._validate_key_name(key_name)
         current_state: KeyState = self._get_state(key_name)
         logger.debug('current state for "{}" is "{}"'.format(key_name, current_state.get_name()))
         rv_key: SecretKey = current_state.get_key()
-        logger.debug('rv_key is "%s"', str(rv_key))
+        logger.debug(LOG_GEY_DEBUG_MESSAGE, str(rv_key))
         if self._should_change_state(current_state, purpose):
             self._change_state(key_name, current_state)
         return rv_key.get_value()
@@ -86,14 +88,14 @@ class KeysManagementStateBased(KeysManagement):
 
     def key_changed(self, key_name: str, old_keys: SecretKeyPairValues, new_keys: SecretKeyPairValues, new_key_store: Optional[KeysStore] = None) -> None:
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('the key "{}" is changed from {} to {} registered callbacks will be executed'.format(key_name, str(SecretKeyPair(old_keys)), str(SecretKeyPair(new_keys))))
+            logger.debug(KEY_CHANGED_DEBUG_MESSAGE.format(key_name, str(SecretKeyPair(old_keys)), str(SecretKeyPair(new_keys))))
         else:
-            logger.info('the key "{}" is changed, registered callbacks will be executed'.format(key_name))
+            logger.info(KEY_CHANGED_INFO_MESSAGE.format(key_name))
         for callback in self.key_definitions[key_name].on_change_callbacks:
             callback(old_keys, new_keys)
 
-    def register_on_change(self, key_name: str, on_change_func: OnChange) -> None:
-        logger.info('registering new OnChange callback for "%s"' % key_name)
+    def register_on_change(self, key_name: str, on_change_func: KeyChangedCallback) -> None:
+        logger.info(REGISTER_ON_CHANGE_LOG_MESSAGE % key_name)
         self._validate_key_name(key_name)
         self.key_definitions[key_name].on_change_callbacks.append(on_change_func)
 

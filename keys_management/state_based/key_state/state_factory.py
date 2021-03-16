@@ -1,12 +1,14 @@
-from typing import Optional
+from __future__ import annotations
+from typing import Optional, TYPE_CHECKING
 from . import KeyState, UndefinedOperationError
 from .decrypted_state import DecryptedState
 from .encrypted_state import EncryptedState
 from .authentication_state import AuthenticationState
 from .stateless_state import StatelessState
-from keys_management import KeysStore
-from keys_management.secret_key import SecretKey, SecretKeyValue
+from keys_management.secret_key import SecretKey
 from ..consts import DECRYPTED_STATE, ENCRYPTED_STATE, AUTHENTICATION_STATE, TEMP_STATE_NAME
+if TYPE_CHECKING:
+    from keys_management import SecretKeyValue, KeysStore
 
 
 class StateFactory(object):

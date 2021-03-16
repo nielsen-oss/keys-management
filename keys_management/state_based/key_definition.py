@@ -1,9 +1,13 @@
-from typing import List
+from __future__ import annotations
+from typing import List, TYPE_CHECKING
 from .key_state import KeyState
 from .key_state.unknown_state import UnknownState
-from .. import OnChange
-from ..secret_key import KeysStore, BaseSecretKeyDefinition, SecretKeyUseCase, SecretKeyState
+from ..secret_key import BaseSecretKeyDefinition, SecretKeyUseCase, SecretKeyState
 from keys_management.consts import ENCRYPTED_STATE, DECRYPTED_STATE
+
+if TYPE_CHECKING:
+    from .. import KeyChangedCallback
+    from ..secret_key import KeysStore
 
 
 class SecretKeyDefinition(BaseSecretKeyDefinition):

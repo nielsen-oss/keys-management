@@ -22,6 +22,9 @@ class KeyDefForTest(BaseSecretKeyDefinition):
         self.next_keys = next_keys
         self.previous_keys = None
 
+    def _validate_properties(self):
+        pass
+
     def set_keys(self, keys):
         if isinstance(keys, tuple):
             self.keys = {'encrypt': keys[0], 'decrypt': keys[1]}

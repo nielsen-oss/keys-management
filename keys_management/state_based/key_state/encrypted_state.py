@@ -1,9 +1,13 @@
+from __future__ import annotations
 import logging
-from typing import Optional, Dict
+from typing import Optional, Dict, TYPE_CHECKING
 from . import KeyState, UndefinedOperationError
-from keys_management import KeysStore
 from keys_management.consts import STATE, ENCRYPTED_STATE, KEY
 from keys_management.secret_key import SecretKey, SecretKeyUseCase
+
+if TYPE_CHECKING:
+    from keys_management import KeysStore
+
 
 logger = logging.getLogger(__name__)
 

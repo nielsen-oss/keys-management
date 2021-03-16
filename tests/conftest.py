@@ -1,9 +1,14 @@
-from typing import List, Tuple
+from __future__ import annotations
+from typing import List, Tuple, TYPE_CHECKING
 from pytest import fixture
 from pytest_mock import MockerFixture
 from keys_management import KeysManagement, StateRepoInterface, CryptoTool
-from keys_management.secret_key import KeysStore, SecretKeyUseCase
+from keys_management.secret_key import SecretKeyUseCase
 from . import KeyDefForTest
+
+if TYPE_CHECKING:
+    from keys_management.secret_key import KeysStore
+
 
 
 @fixture
@@ -99,7 +104,7 @@ def DE_stateless_not_accessible(key_definition_factory):
 
 @fixture
 def DE_stateless_accessible(key_definition_factory):
-    key_name = 'DE_stated_accessible'
+    key_name = 'DE_stateless_accessible'
     return key_definition_factory(name=key_name, keys=convert_key_name_to_values(key_name),
                                   use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION, stateless=True, target_data_accessible=True, keep_in_cache=True)
 
