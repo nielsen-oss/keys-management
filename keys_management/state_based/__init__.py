@@ -4,6 +4,7 @@ import logging
 from .key_definition import SecretKeyDefinition
 from .consts import DECRYPTED_STATE, AUTHENTICATION_STATE, TEMP_STATE_NAME
 from .. import KeysManagement, StateRepoInterface, CryptoTool, KeyIsNotDefinedError
+from ..errors import OnKeyChangedCallbackErrorStrategy
 from ..consts import STATE, KEY, DEFINE_KEY_LOG_MESSAGE, GET_KEY_INFO_MESSAGE, LOG_GEY_DEBUG_MESSAGE, KEY_CHANGED_DEBUG_MESSAGE, KEY_CHANGED_INFO_MESSAGE, REGISTER_ON_CHANGE_LOG_MESSAGE
 from ..state_based.key_state import KeyState
 from ..state_based.key_state.state_factory import StateFactory
@@ -27,7 +28,8 @@ class KeysManagementStateBased(KeysManagement):
         self.crypto_tool = crypto_tool
         self.key_definitions = {}
 
-    def define_key(self, name: str, keys_store: KeysStore, is_stateless: bool, use_case: SecretKeyUseCase, is_target_data_accessible: bool) -> KeysManagement:
+    def define_key(self, name: str, keys_store: KeysStore, is_stateless: bool, use_case: SecretKeyUseCase,
+                   is_target_data_accessible: bool, on_key_changed_callback_error_strategy: OnKeyChangedCallbackErrorStrategy = None) -> KeysManagement:
         logger.info(DEFINE_KEY_LOG_MESSAGE % name)
         self.key_definitions[name] = SecretKeyDefinition(name, keys_store, is_stateless, use_case, is_target_data_accessible)
         return self

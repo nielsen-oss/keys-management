@@ -16,11 +16,15 @@ class KeyDefForTest(BaseSecretKeyDefinition):
     key_as_single: bool
 
     def __init__(self, name: str, keys: Keys, next_keys: Optional[Keys] = None, key_as_single: bool = False, **kwargs):
-        super().__init__(name, mock.MagicMock(side_effect=lambda: keys), **kwargs)
         self.key_as_single = key_as_single
         self.set_keys(keys)
         self.next_keys = next_keys
         self.previous_keys = None
+
+        def side_effect():
+            return self.keys
+
+        super().__init__(name, mock.MagicMock(side_effect=side_effect), **kwargs)
 
     def _validate_properties(self):
         pass
@@ -36,7 +40,6 @@ class KeyDefForTest(BaseSecretKeyDefinition):
     def set_next_as_keys(self, next_keys: Optional[Keys] = None):
         self.previous_keys = self.keys
         self.set_keys(self.next_keys if next_keys is None else next_keys)
-        self.keys_store.side_effect = lambda: self.keys
         self.next_keys = None
 
     def get_key_state(self) -> SecretKeyState:

@@ -3,13 +3,37 @@ from typing import TYPE_CHECKING, Dict, Optional
 from abc import ABC, abstractmethod
 import inspect
 from unittest.mock import Mock
+from collections import OrderedDict
+from .secret_key import SecretKeyPair
 from .secret_key_use_case import SecretKeyUseCase
 from .key_state import SecretKeyState
 from .errors import InitError
 from ..errors import KeysManagementError, OnKeyChangedCallbackErrorStrategy
 
+NAME_PROP = 'name'
+USE_CASE_PROP = 'useCase'
+STATELESS_PROP = 'stateless'
+TARGET_DATA_ACCESSIBLE_PROP = 'targetDataAccessible'
+KEEP_IN_CACHE_PROP = 'keepInCache'
+LAST_USE_PROP = 'lastUse'
+
+ERROR_STRATEGY_TYPE_ERR_MSG = '"on_key_changed_callback_error_strategy" property is not type of "OnKeyChangedCallbackErrorStrategy"'
+KEEP_IN_CACHE_NOT_BOOL_ERR_MSG = '"keep_in_cache" property is not boolean'
+TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG = '"target_data_accessible" property is not boolean'
+STATELESS_NOT_BOOL_ERR_MSG = '"stateless" property is not boolean'
+USE_CASE_PROP_TYPE_ERR = '"use_case" property is not type of "SecretKeyUseCase"'
+SHOULD_NOT_CONTAINS_ARGS_MSG = '"keys_store" signature should not contains args'
+STORE_IS_NOT_CALLABLE_MSG = '"keys_store" is not callable'
+NAME_PROPERTY_IS_EMPTY_MSG = '"name" property is empty'
+
+CALLBACK_ERROR_STRATEGY_ARG = 'on_key_changed_callback_error_strategy'
+KEEP_IN_CACHE_ARG = 'keep_in_cache'
+TARGET_DATA_ACCESSIBLE_ARG = 'target_data_accessible'
+STATELESS_ARG = 'stateless'
+USE_CASE_ARG = 'use_case'
+
 if TYPE_CHECKING:
-    from ..key_changed_callback import KeyChangedCallback
+    from ..key_changed_utils import KeyChangedCallback
     from .types import KeysStore, SecretKeyPair, SecretKeyPairValues
 
 
@@ -26,31 +50,31 @@ class BaseSecretKeyDefinition(ABC):
     def __init__(self, name: str, keys_store: KeysStore, **kwargs):
         self._name = name
         self._keys_store = keys_store
-        self._use_case = kwargs.get('use_case', SecretKeyUseCase.ENCRYPTION_DECRYPTION)
-        self._stateless = kwargs.get('stateless', True)
-        self._target_data_accessible = kwargs.get('target_data_accessible', True)
-        self._keep_in_cache = kwargs.get('keep_in_cache', True)
-        self._on_key_changed_callback_error_strategy = kwargs.get('on_key_changed_callback_error_strategy', OnKeyChangedCallbackErrorStrategy.HALT)
-        self._on_change_callbacks = {}
+        self._use_case = kwargs.get(USE_CASE_ARG, SecretKeyUseCase.ENCRYPTION_DECRYPTION)
+        self._stateless = kwargs.get(STATELESS_ARG, True)
+        self._target_data_accessible = kwargs.get(TARGET_DATA_ACCESSIBLE_ARG, True)
+        self._keep_in_cache = kwargs.get(KEEP_IN_CACHE_ARG, True)
+        self._on_key_changed_callback_error_strategy = kwargs.get(CALLBACK_ERROR_STRATEGY_ARG, OnKeyChangedCallbackErrorStrategy.HALT)
+        self._on_change_callbacks = OrderedDict()
         self._validate_properties()
 
     def _validate_properties(self):
         if not isinstance(self._name, str) or len(self._name) == 0:
-            raise SecretKeyDefinitionInitError('"name" property is empty')
+            raise SecretKeyDefinitionInitError(NAME_PROPERTY_IS_EMPTY_MSG)
         if not callable(self._keys_store):
-            raise SecretKeyDefinitionInitError('"keys_store" is not callable')
+            raise SecretKeyDefinitionInitError(STORE_IS_NOT_CALLABLE_MSG)
         if not isinstance(self._keys_store, (Mock)) and len(inspect.signature(self._keys_store).parameters) > 0:
-            raise SecretKeyDefinitionInitError('"keys_store" signature should not contains args')
+            raise SecretKeyDefinitionInitError(SHOULD_NOT_CONTAINS_ARGS_MSG)
         if not isinstance(self._use_case, SecretKeyUseCase):
-            raise SecretKeyDefinitionInitError('"use_case" property is not type of "SecretKeyUseCase"')
+            raise SecretKeyDefinitionInitError(USE_CASE_PROP_TYPE_ERR)
         if not isinstance(self._stateless, bool):
-            raise SecretKeyDefinitionInitError('"stateless" property is not boolean')
+            raise SecretKeyDefinitionInitError(STATELESS_NOT_BOOL_ERR_MSG)
         if not isinstance(self._target_data_accessible, bool):
-            raise SecretKeyDefinitionInitError('"target_data_accessible" property is not boolean')
+            raise SecretKeyDefinitionInitError(TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG)
         if not isinstance(self._keep_in_cache, bool):
-            raise SecretKeyDefinitionInitError('"keep_in_cache" property is not boolean')
+            raise SecretKeyDefinitionInitError(KEEP_IN_CACHE_NOT_BOOL_ERR_MSG)
         if not isinstance(self._on_key_changed_callback_error_strategy, OnKeyChangedCallbackErrorStrategy):
-            raise SecretKeyDefinitionInitError('"_on_key_changed_callback_error_strategy" property is not type of "OnKeyChangedCallbackErrorStrategy"')
+            raise SecretKeyDefinitionInitError(ERROR_STRATEGY_TYPE_ERR_MSG)
 
     @property
     def name(self) -> str:
@@ -89,19 +113,19 @@ class BaseSecretKeyDefinition(ABC):
         pass
 
     @property
-    def on_key_changed_error(self) -> OnKeyChangedError:
-        return self.on_key_changed_error
+    def on_key_changed_callback_error_strategy(self) -> OnKeyChangedCallbackErrorStrategy:
+        return self._on_key_changed_callback_error_strategy
 
     def __str__(self):
         return str(self.asdict())
 
     def asdict(self) -> Dict:
         return {
-            'name': self._name,
-            'useCase': self._use_case.name,
-            'stateless': self._stateless,
-            'keepInCache': self._keep_in_cache,
-            'targetDataAccessible': self._target_data_accessible
+            NAME_PROP: self._name,
+            USE_CASE_PROP: self._use_case.name,
+            STATELESS_PROP: self._stateless,
+            KEEP_IN_CACHE_PROP: self._keep_in_cache,
+            TARGET_DATA_ACCESSIBLE_PROP: self._target_data_accessible
         }
 
 
@@ -177,7 +201,7 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
     def asdict(self):
         rv = super(SecretKeyDefinition, self).asdict()
         rv.update({
-            'lastUse': str(self._last_use)
+            LAST_USE_PROP: str(self._last_use)
         })
         return rv
 
