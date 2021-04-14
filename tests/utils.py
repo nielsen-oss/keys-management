@@ -2,9 +2,15 @@ from typing import Dict
 
 from keys_management.secret_key import SecretKeyUseCase
 from keys_management.state_based.key_state import OneState
-from keys_management.state_based.key_state.unknown_state import UnknownState
-from keys_management.state_based.key_state.decrypted_state import DecryptedState
-from keys_management.state_based.key_state.encrypted_state import EncryptedState
+from keys_management.state_based.key_state.unknown_state import (
+    UnknownState,
+)
+from keys_management.state_based.key_state.decrypted_state import (
+    DecryptedState,
+)
+from keys_management.state_based.key_state.encrypted_state import (
+    EncryptedState,
+)
 
 
 def create_unknown_state() -> UnknownState:
@@ -32,7 +38,6 @@ def create_one_state():
 
 
 class StubOneState(OneState):
-
     def get_use_case(self) -> SecretKeyUseCase:
         return SecretKeyUseCase.ENCRYPTION_DECRYPTION
 

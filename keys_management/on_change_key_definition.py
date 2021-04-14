@@ -1,6 +1,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from .secret_key import SecretKeyUseCase, SecretKeyState, BaseSecretKeyDefinition, InitError
+from .secret_key import (
+    SecretKeyUseCase,
+    SecretKeyState,
+    BaseSecretKeyDefinition,
+    InitError,
+)
 
 if TYPE_CHECKING:
     from .secret_key import KeysStore, SecretKeyPairValues
@@ -11,7 +16,9 @@ class OnChangeKeyDefinition(SecretKeyState):
     __key_state: SecretKeyState
 
     def __init__(self, original_key_definition: BaseSecretKeyDefinition):
-        if not isinstance(original_key_definition, BaseSecretKeyDefinition):
+        if not isinstance(
+            original_key_definition, BaseSecretKeyDefinition
+        ):
             raise OnChangeKeyDefinitionInitError(original_key_definition)
         self.__originalKeyDefinition = original_key_definition
         self.__state = original_key_definition.get_key_state()
@@ -58,4 +65,8 @@ class OnChangeKeyDefinition(SecretKeyState):
 
 class OnChangeKeyDefinitionInitError(InitError):
     def __init__(self, original_key_definition: Any) -> None:
-        super().__init__('OnChangeKeyDefinition', "original_key_definition type is %s" % str(type(original_key_definition)))
+        super().__init__(
+            'OnChangeKeyDefinition',
+            "original_key_definition type is %s"
+            % str(type(original_key_definition)),
+        )

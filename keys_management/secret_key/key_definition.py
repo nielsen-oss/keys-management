@@ -19,10 +19,16 @@ LAST_USE_PROP = 'lastUse'
 
 ERROR_STRATEGY_TYPE_ERR_MSG = '"on_key_changed_callback_error_strategy" property is not type of "OnKeyChangedCallbackErrorStrategy"'
 KEEP_IN_CACHE_NOT_BOOL_ERR_MSG = '"keep_in_cache" property is not boolean'
-TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG = '"target_data_accessible" property is not boolean'
+TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG = (
+    '"target_data_accessible" property is not boolean'
+)
 STATELESS_NOT_BOOL_ERR_MSG = '"stateless" property is not boolean'
-USE_CASE_PROP_TYPE_ERR = '"use_case" property is not type of "SecretKeyUseCase"'
-SHOULD_NOT_CONTAINS_ARGS_MSG = '"keys_store" signature should not contains args'
+USE_CASE_PROP_TYPE_ERR = (
+    '"use_case" property is not type of "SecretKeyUseCase"'
+)
+SHOULD_NOT_CONTAINS_ARGS_MSG = (
+    '"keys_store" signature should not contains args'
+)
 STORE_IS_NOT_CALLABLE_MSG = '"keys_store" is not callable'
 NAME_PROPERTY_IS_EMPTY_MSG = '"name" property is empty'
 
@@ -50,11 +56,18 @@ class BaseSecretKeyDefinition(ABC):
     def __init__(self, name: str, keys_store: KeysStore, **kwargs):
         self._name = name
         self._keys_store = keys_store
-        self._use_case = kwargs.get(USE_CASE_ARG, SecretKeyUseCase.ENCRYPTION_DECRYPTION)
+        self._use_case = kwargs.get(
+            USE_CASE_ARG, SecretKeyUseCase.ENCRYPTION_DECRYPTION
+        )
         self._stateless = kwargs.get(STATELESS_ARG, True)
-        self._target_data_accessible = kwargs.get(TARGET_DATA_ACCESSIBLE_ARG, True)
+        self._target_data_accessible = kwargs.get(
+            TARGET_DATA_ACCESSIBLE_ARG, True
+        )
         self._keep_in_cache = kwargs.get(KEEP_IN_CACHE_ARG, True)
-        self._on_key_changed_callback_error_strategy = kwargs.get(CALLBACK_ERROR_STRATEGY_ARG, OnKeyChangedCallbackErrorStrategy.HALT)
+        self._on_key_changed_callback_error_strategy = kwargs.get(
+            CALLBACK_ERROR_STRATEGY_ARG,
+            OnKeyChangedCallbackErrorStrategy.HALT,
+        )
         self._on_change_callbacks = OrderedDict()
         self._validate_properties()
 
@@ -63,17 +76,29 @@ class BaseSecretKeyDefinition(ABC):
             raise SecretKeyDefinitionInitError(NAME_PROPERTY_IS_EMPTY_MSG)
         if not callable(self._keys_store):
             raise SecretKeyDefinitionInitError(STORE_IS_NOT_CALLABLE_MSG)
-        if not isinstance(self._keys_store, (Mock)) and len(inspect.signature(self._keys_store).parameters) > 0:
-            raise SecretKeyDefinitionInitError(SHOULD_NOT_CONTAINS_ARGS_MSG)
+        if (
+            not isinstance(self._keys_store, (Mock))
+            and len(inspect.signature(self._keys_store).parameters) > 0
+        ):
+            raise SecretKeyDefinitionInitError(
+                SHOULD_NOT_CONTAINS_ARGS_MSG
+            )
         if not isinstance(self._use_case, SecretKeyUseCase):
             raise SecretKeyDefinitionInitError(USE_CASE_PROP_TYPE_ERR)
         if not isinstance(self._stateless, bool):
             raise SecretKeyDefinitionInitError(STATELESS_NOT_BOOL_ERR_MSG)
         if not isinstance(self._target_data_accessible, bool):
-            raise SecretKeyDefinitionInitError(TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG)
+            raise SecretKeyDefinitionInitError(
+                TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG
+            )
         if not isinstance(self._keep_in_cache, bool):
-            raise SecretKeyDefinitionInitError(KEEP_IN_CACHE_NOT_BOOL_ERR_MSG)
-        if not isinstance(self._on_key_changed_callback_error_strategy, OnKeyChangedCallbackErrorStrategy):
+            raise SecretKeyDefinitionInitError(
+                KEEP_IN_CACHE_NOT_BOOL_ERR_MSG
+            )
+        if not isinstance(
+            self._on_key_changed_callback_error_strategy,
+            OnKeyChangedCallbackErrorStrategy,
+        ):
             raise SecretKeyDefinitionInitError(ERROR_STRATEGY_TYPE_ERR_MSG)
 
     @property
@@ -113,7 +138,9 @@ class BaseSecretKeyDefinition(ABC):
         pass
 
     @property
-    def on_key_changed_callback_error_strategy(self) -> OnKeyChangedCallbackErrorStrategy:
+    def on_key_changed_callback_error_strategy(
+        self,
+    ) -> OnKeyChangedCallbackErrorStrategy:
         return self._on_key_changed_callback_error_strategy
 
     def __str__(self):
@@ -125,7 +152,7 @@ class BaseSecretKeyDefinition(ABC):
             USE_CASE_PROP: self._use_case.name,
             STATELESS_PROP: self._stateless,
             KEEP_IN_CACHE_PROP: self._keep_in_cache,
-            TARGET_DATA_ACCESSIBLE_PROP: self._target_data_accessible
+            TARGET_DATA_ACCESSIBLE_PROP: self._target_data_accessible,
         }
 
 
@@ -135,7 +162,9 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
     _previous_keys: Optional[SecretKeyPair]
 
     def __init__(self, name: str, keys_store: KeysStore, **kwargs):
-        super(SecretKeyDefinition, self).__init__(name, keys_store, **kwargs)
+        super(SecretKeyDefinition, self).__init__(
+            name, keys_store, **kwargs
+        )
         self._last_use = None
         self._current_keys = None
         self._previous_keys = None
@@ -173,7 +202,10 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
         self._last_use = use_case
 
     def has_keys(self) -> bool:
-        return self._current_keys is not None or self._previous_keys is not None
+        return (
+            self._current_keys is not None
+            or self._previous_keys is not None
+        )
 
     def clean_keys(self) -> None:
         self._previous_keys = self.get_keys_or_previous()
@@ -188,7 +220,10 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
     def set_key_state(self, key_state: SecretKeyState) -> None:
         self.set_last_use_case(key_state.get_last_use_case())
         previous_keys = key_state.get_previous_keys()
-        if previous_keys != self._previous_keys and previous_keys is not None:
+        if (
+            previous_keys != self._previous_keys
+            and previous_keys is not None
+        ):
             self.set_previous_keys(previous_keys)
 
     def get_previous_keys(self):
@@ -200,13 +235,10 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
 
     def asdict(self):
         rv = super(SecretKeyDefinition, self).asdict()
-        rv.update({
-            LAST_USE_PROP: str(self._last_use)
-        })
+        rv.update({LAST_USE_PROP: str(self._last_use)})
         return rv
 
 
 class SecretKeyDefinitionInitError(InitError):
     def __init__(self, reason: str) -> None:
         super().__init__('SecretKeyDefinition', reason)
-

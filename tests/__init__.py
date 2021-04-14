@@ -1,6 +1,9 @@
 from typing import Union, Dict, Optional, Tuple
 from unittest import mock
-from keys_management.secret_key import BaseSecretKeyDefinition, SecretKeyState
+from keys_management.secret_key import (
+    BaseSecretKeyDefinition,
+    SecretKeyState,
+)
 
 NAME = 'name'
 KEYS_STORE = 'keys_store'
@@ -15,7 +18,14 @@ class KeyDefForTest(BaseSecretKeyDefinition):
     previous_keys: Optional[Keys]
     key_as_single: bool
 
-    def __init__(self, name: str, keys: Keys, next_keys: Optional[Keys] = None, key_as_single: bool = False, **kwargs):
+    def __init__(
+        self,
+        name: str,
+        keys: Keys,
+        next_keys: Optional[Keys] = None,
+        key_as_single: bool = False,
+        **kwargs
+    ):
         self.key_as_single = key_as_single
         self.set_keys(keys)
         self.next_keys = next_keys
@@ -24,7 +34,9 @@ class KeyDefForTest(BaseSecretKeyDefinition):
         def side_effect():
             return self.keys
 
-        super().__init__(name, mock.MagicMock(side_effect=side_effect), **kwargs)
+        super().__init__(
+            name, mock.MagicMock(side_effect=side_effect), **kwargs
+        )
 
     def _validate_properties(self):
         pass
@@ -35,7 +47,11 @@ class KeyDefForTest(BaseSecretKeyDefinition):
         elif isinstance(keys, (str, bytes)) and self.key_as_single:
             self.keys = keys
         else:
-            self.keys = keys if isinstance(keys, dict) else {'encrypt': keys, 'decrypt': keys}
+            self.keys = (
+                keys
+                if isinstance(keys, dict)
+                else {'encrypt': keys, 'decrypt': keys}
+            )
 
     def set_next_as_keys(self, next_keys: Optional[Keys] = None):
         self.previous_keys = self.keys

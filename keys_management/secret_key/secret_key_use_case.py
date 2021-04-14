@@ -24,6 +24,6 @@ class SecretKeyUseCase(Enum):
 
 class InvalidUseCaseNameError(KeysManagementError):
     def __init__(self, bad_value: str) -> None:
-        super().__init__('Failed to parse "" to SecretKeyUseCase' % bad_value)
-
-
+        super().__init__(
+            'Failed to parse "" to SecretKeyUseCase' % bad_value
+        )

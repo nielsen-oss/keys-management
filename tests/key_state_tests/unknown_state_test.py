@@ -34,9 +34,11 @@ class TestUnknownState:
     def test_opposite_state__error_is_raised(self, unknown_state):
         assert unknown_state.get_opposite_state() is None
 
-    def test_set_keys_store__error_is_raised(self, unknown_state, key_store):
+    def test_set_keys_store__error_is_raised(
+        self, unknown_state, key_store
+    ):
         with pytest.raises(UndefinedOperationError):
             unknown_state.set_keys_store(key_store)
 
     def test_to_dict_(self, unknown_state):
-        assert unknown_state.to_dict() == {STATE:'unknown'}
+        assert unknown_state.to_dict() == {STATE: 'unknown'}
