@@ -7,7 +7,6 @@ from keys_management import (
     StateRepoInterface,
     CryptoTool,
     SecretKeyUseCase,
-    OnChangeKeyDefinition,
     SecretKeyDefinitionInitError,
     KeyChangedError,
 )
@@ -15,7 +14,6 @@ from keys_management.consts import KEY, STATE
 from . import KeyDefForTest
 from pytest_mock import MockerFixture
 from unittest.mock import ANY
-import logging
 
 
 class TestDefineKey:
