@@ -25,7 +25,7 @@ jobs:
         run: |
           pytest
       - name: Bump Version
-        run: bump2version minor --verbose
+        run: bump2version patch --verbose
       - name: Build a binary wheel and a source tarball
         run: >-
           python -m
