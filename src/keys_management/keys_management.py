@@ -1,17 +1,12 @@
 from __future__ import annotations
-from typing import Dict, Optional, Union, TYPE_CHECKING, Callable
+from typing import Dict, Optional, TYPE_CHECKING, Callable
 import logging
-from collections import OrderedDict
 from .secret_key import (
     SecretKeyUseCase,
     SecretKeyDefinition,
     SecretKey,
     InvalidUseCaseNameError,
     SecretKeyPair,
-)
-from .on_change_key_definition import (
-    OnChangeKeyDefinition,
-    OnChangeKeyDefinitionInitError,
 )
 from .dependecies import StateRepoInterface, CryptoTool
 from .consts import TRACE_LEVEL, TRACE_LEVEL_NAME, STATE, KEY
@@ -38,7 +33,7 @@ from .errors import (
     FetchAndSetStateFromRepoError,
     InvalidKeyStateError,
 )
-from .key_changed_utils import CallbackStatus, KeyChangedContext
+from .key_changed_utils import KeyChangedContext
 
 
 PURPOSE_IS_NOT_USECASE_TYPE_MSG = (

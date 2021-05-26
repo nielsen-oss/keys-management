@@ -2,8 +2,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 from math import floor
 
-from .key_state import SecretKeyState
-from .secret_key_use_case import InvalidUseCaseNameError, SecretKeyUseCase
 from .errors import InitError
 from ..consts import (
     ENCRYPTION_KEY_TYPE,
@@ -13,7 +11,7 @@ from ..consts import (
 )
 
 if TYPE_CHECKING:
-    from .types import SecretKeyValue, SecretKeyPairValues, KeysStore
+    from .types import SecretKeyValue, SecretKeyPairValues
 
 
 class SecretKey:
@@ -41,9 +39,9 @@ class SecretKey:
 
         revealedPartSize = min(4, floor(key_length / 4))
         return (
-            str_to_censor[0:revealedPartSize]
-            + "*" * (key_length - 2 * revealedPartSize)
-            + str_to_censor[key_length - revealedPartSize :]
+                str_to_censor[0:revealedPartSize]
+                + "*" * (key_length - 2 * revealedPartSize)
+                + str_to_censor[key_length - revealedPartSize:]
         )
 
 

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Union, TYPE_CHECKING
+from typing import Callable, Union, Dict, TYPE_CHECKING
 from enum import Enum
 import logging
 from .on_change_key_definition import OnChangeKeyDefinition
@@ -17,6 +17,7 @@ class CallbackStatus(Enum):
 
 if TYPE_CHECKING:
     from .secret_key import SecretKeyPairValues
+    from .secret_key.key_definition import SecretKeyDefinition
 
     KeyChangedCallback = Callable[
         [
