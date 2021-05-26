@@ -24,7 +24,7 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
-      - uses: ./.github/actions/my-action
+      - uses: ./.github/actions/bump_version
       - name: Build a binary wheel and a source tarball
         run: >-
           python -m
