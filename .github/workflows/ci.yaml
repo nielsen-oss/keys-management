@@ -24,17 +24,7 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
-      - name: set previous version
-        id: previous_version
-        run: echo ::set-output name=version::$(cat VERSION)
-      - name: Bump Version
-        run: bump2version patch --verbose
-      - name: set current version
-        id: current_version
-        run: echo ::set-output name=version::$(cat VERSION)
-      - uses: EndBug/add-and-commit@v7
-        with:
-          message: "Bump version: ${{ steps.previous_version.outputs.version }} → ${{ steps.current_version.outputs.version }}"
+      - uses: ./bump_version
       - name: Build a binary wheel and a source tarball
         run: >-
           python -m
