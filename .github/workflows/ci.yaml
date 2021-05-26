@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install black pytest mypy pylint twine build bump2version
+          python3 -m pip install black pytest mypy pylint twine build bump2version pytest_mock
           if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
       - uses: actions/checkout@v2
       - name: install self
