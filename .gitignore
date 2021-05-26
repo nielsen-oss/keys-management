@@ -2,3 +2,4 @@ build
 dist
 keys_management.egg-info
 .idea
+.pypirc
