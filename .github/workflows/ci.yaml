@@ -8,25 +8,17 @@ on:
 jobs:
   setup-environment:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.7, 3.8]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.8
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install black pytest mypy pylint twine build bump2version
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
       - uses: actions/checkout@v2
-      - name: Lint with flake8
-        run: |
-          black -S -l 75 --check .
-          find . -name "*.py" | xargs mypy
-          find . -name "*.py" | xargs pylint-fail-under --fail_under $PYLINT_THRESHOLD
       - name: Test with pytest
         run: |
           pytest
