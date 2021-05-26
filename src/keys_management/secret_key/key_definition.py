@@ -8,7 +8,10 @@ from .secret_key import SecretKeyPair
 from .secret_key_use_case import SecretKeyUseCase
 from .key_state import SecretKeyState
 from .errors import InitError
-from ..errors import KeysManagementError, OnKeyChangedCallbackErrorStrategy
+from ..errors import OnKeyChangedCallbackErrorStrategy
+if TYPE_CHECKING:
+    from ..key_changed_utils import KeyChangedCallback
+    from .types import KeysStore, SecretKeyPairValues
 
 NAME_PROP = 'name'
 USE_CASE_PROP = 'useCase'
@@ -37,10 +40,6 @@ KEEP_IN_CACHE_ARG = 'keep_in_cache'
 TARGET_DATA_ACCESSIBLE_ARG = 'target_data_accessible'
 STATELESS_ARG = 'stateless'
 USE_CASE_ARG = 'use_case'
-
-if TYPE_CHECKING:
-    from ..key_changed_utils import KeyChangedCallback
-    from .types import KeysStore, SecretKeyPair, SecretKeyPairValues
 
 
 class BaseSecretKeyDefinition(ABC):
@@ -77,7 +76,7 @@ class BaseSecretKeyDefinition(ABC):
         if not callable(self._keys_store):
             raise SecretKeyDefinitionInitError(STORE_IS_NOT_CALLABLE_MSG)
         if (
-            not isinstance(self._keys_store, (Mock))
+            not isinstance(self._keys_store, Mock)
             and len(inspect.signature(self._keys_store).parameters) > 0
         ):
             raise SecretKeyDefinitionInitError(

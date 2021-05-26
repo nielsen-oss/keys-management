@@ -1,10 +1,10 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
-from .secret_key_use_case import SecretKeyUseCase
 
 if TYPE_CHECKING:
-    from .types import SecretKeyUseCase, SecretKeyPairValues
+    from .secret_key_use_case import SecretKeyUseCase
+    from .types import SecretKeyPairValues
 
 
 class SecretKeyState(ABC):
