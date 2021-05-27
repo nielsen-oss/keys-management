@@ -14,14 +14,14 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install black pytest mypy pylint twine build bump2version pytest_mock
+          python3 -m pip install black pytest pytest-custom_exit_code mypy pylint twine build bump2version pytest_mock
           if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
       - uses: actions/checkout@v2
       - name: install self
         run: pwd & python3 -m pip install .
       - name: Unittests With Pytest
         run: |
-          pytest -m unittest
+          pytest -m unittest --suppress-no-test-exit-code
       - name: Integration Tests With Ptest
         run: |
-          pytest -m integrationtest
+          pytest -m integrationtest --suppress-no-test-exit-code
