@@ -6,7 +6,7 @@ on:
       - 'main'
 
 jobs:
-  setup-environment:
+  on_push:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python 3.8

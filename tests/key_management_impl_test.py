@@ -16,6 +16,7 @@ from pytest_mock import MockerFixture
 from unittest.mock import ANY
 
 
+@mark.unittest
 class TestDefineKey:
     @staticmethod
     def define_key_test(
@@ -395,6 +396,7 @@ class TestDefineKey:
             )
 
 
+@mark.unittest
 class TestGetKey:
     def test_key_was_not_defined__error_is_raised(
         self,
@@ -590,6 +592,7 @@ class TestGetKey:
         )
 
 
+@mark.unittest
 class TestGetKeyEEDDE:
     @staticmethod
     def get_key_EEDDE_scenario_test(
@@ -693,6 +696,7 @@ class TestGetKeyEEDDE:
         )
 
 
+@mark.unittest
 class TestGetKeyDDEED:
     @staticmethod
     def get_key_DDEED_scenario_test(
@@ -814,6 +818,7 @@ class TestGetKeyDDEED:
         )
 
 
+@mark.unittest
 class TestGetKeyECE:
     @staticmethod
     def get_key_ECE_scenario_test(
@@ -906,6 +911,7 @@ class TestGetKeyECE:
         )
 
 
+@mark.unittest
 class TestGetKeyECD:
     @staticmethod
     def get_key_ECD_scenario_test(
@@ -997,6 +1003,7 @@ class TestGetKeyECD:
         )
 
 
+@mark.unittest
 class TestGetKeyDCE:
     @staticmethod
     def get_key_DCE_scenario_test(
@@ -1107,7 +1114,7 @@ class TestGetKeyDCE:
 # repository cache usage
 # local cache usage according to each use-case
 
-
+@mark.unittest
 class TestGetKeyDCD:
     @staticmethod
     def get_key_DCD_scenario_test(
@@ -1220,6 +1227,7 @@ class TestGetKeyDCD:
         )
 
 
+@mark.unittest
 class TestGetKeyA:
     @staticmethod
     def get_key_AA_scenario_test(
@@ -1350,6 +1358,7 @@ class TestGetKeyA:
         )
 
 
+@mark.unittest
 class TestKeyManagementImpl:
     def test_on_change_invalid_key(
         self, keys_management: KeysManagement, not_defined_key_name: str
