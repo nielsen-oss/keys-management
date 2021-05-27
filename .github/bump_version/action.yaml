@@ -7,11 +7,14 @@ runs:
     - name: set previous version
       id: previous_version
       run: echo ::set-output name=version::$(cat VERSION)
+      shell: bash
     - name: Bump Version
       run: bump2version patch --verbose
+      shell: bash
     - name: set current version
       id: current_version
       run: echo ::set-output name=version::$(cat VERSION)
+      shell: bash
     - uses: EndBug/add-and-commit@v7
       with:
         message: "Bump version: ${{ steps.previous_version.outputs.version }} → ${{ steps.current_version.outputs.version }}"
