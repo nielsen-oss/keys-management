@@ -1,4 +1,6 @@
 # keys-management
+pip package: https://pypi.org/project/keys-management/
+
 [![On Pull Request](https://github.com/nielsen-oss/keys-management/actions/workflows/pr_ci.yaml/badge.svg?branch=main)](https://github.com/nielsen-oss/keys-management/actions/workflows/pr_ci.yaml)
 [![Python package](https://github.com/nielsen-oss/keys-management/actions/workflows/push_ci.yaml/badge.svg?branch=main)](https://github.com/nielsen-oss/keys-management/actions/workflows/push_ci.yaml)
 
