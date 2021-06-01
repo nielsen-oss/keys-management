@@ -55,15 +55,9 @@ def keys_management(
     all_key_definitions: List[KeyDefForTest],
 ):
     for key_def in all_key_definitions:
-        empty_keys_management.define_key(
-            key_def.name,
-            key_def.keys_store,
-            key_def.is_stateless(),
-            key_def.use_case,
-            key_def.is_target_data_accessible(),
-            key_def.is_keep_in_cache(),
-            key_def.on_key_changed_callback_error_strategy,
-        )
+        empty_keys_management.define_key(key_def.name, key_def.keys_store, key_def.use_case, key_def.is_stateless(),
+                                         key_def.is_target_data_accessible(), key_def.is_keep_in_cache(),
+                                         key_def.on_key_changed_callback_error_strategy)
     return empty_keys_management
 
 

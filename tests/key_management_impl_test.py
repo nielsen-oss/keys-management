@@ -28,14 +28,8 @@ class TestDefineKey:
         key_name = key_definition.name
         keys_store = key_definition.keys_store
         # act
-        empty_keys_management.define_key(
-            key_name,
-            keys_store,
-            key_definition.is_stateless(),
-            key_definition.use_case,
-            key_definition.is_target_data_accessible(),
-            key_definition.is_keep_in_cache(),
-        )
+        empty_keys_management.define_key(key_name, keys_store, key_definition.use_case, key_definition.is_stateless(),
+                                         key_definition.is_target_data_accessible(), key_definition.is_keep_in_cache())
         # assert
         defined_key: KeysManagement = (
             empty_keys_management._keys_definitions[key_name]
@@ -198,14 +192,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                None,
-                key_definition.keys_store,
-                key_definition.is_stateless(),
-                key_definition.use_case,
-                key_definition.is_target_data_accessible(),
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key(None, key_definition.keys_store, key_definition.use_case,
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_name__name_is_empty(
         self,
@@ -215,14 +204,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                '',
-                key_definition.keys_store,
-                key_definition.is_stateless(),
-                key_definition.use_case,
-                key_definition.is_target_data_accessible(),
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key('', key_definition.keys_store, key_definition.use_case,
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_name__name_is_not_str(
         self,
@@ -232,14 +216,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                True,
-                key_definition.keys_store,
-                key_definition.is_stateless(),
-                key_definition.use_case,
-                key_definition.is_target_data_accessible(),
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key(True, key_definition.keys_store, key_definition.use_case,
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_keys_store__is_none(
         self,
@@ -249,14 +228,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                key_definition.name,
-                None,
-                key_definition.is_stateless(),
-                key_definition.use_case,
-                key_definition.is_target_data_accessible(),
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key(key_definition.name, None, key_definition.use_case,
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_keys_store__is_not_callable(
         self,
@@ -266,14 +240,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                key_definition.name,
-                "im_str",
-                key_definition.is_stateless(),
-                key_definition.use_case,
-                key_definition.is_target_data_accessible(),
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key(key_definition.name, "im_str", key_definition.use_case,
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_keys_store__callable_with_args(
         self,
@@ -283,14 +252,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                key_definition.name,
-                lambda a: a,
-                key_definition.is_stateless(),
-                key_definition.use_case,
-                key_definition.is_target_data_accessible(),
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key(key_definition.name, lambda a: a, key_definition.use_case,
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_stateless(
         self,
@@ -300,14 +264,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                key_definition.name,
-                key_definition.keys_store,
-                'aaa',
-                key_definition.use_case,
-                key_definition.is_target_data_accessible(),
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.use_case,
+                                             'aaa', key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_use_case_is_none(
         self,
@@ -317,14 +276,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                key_definition.name,
-                key_definition.keys_store,
-                key_definition.is_stateless(),
-                None,
-                key_definition.is_target_data_accessible(),
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, None,
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_use_case_is_not_use_case_type(
         self,
@@ -334,14 +288,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                key_definition.name,
-                key_definition.keys_store,
-                key_definition.is_stateless(),
-                'ENCRYPTION',
-                key_definition.is_target_data_accessible(),
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, 'ENCRYPTION',
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_target_data_accessible(
         self,
@@ -351,14 +300,8 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                key_definition.name,
-                key_definition.keys_store,
-                key_definition.is_stateless(),
-                key_definition.use_case,
-                "aaa",
-                key_definition.is_keep_in_cache(),
-            )
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.use_case,
+                                             key_definition.is_stateless(), "aaa", key_definition.is_keep_in_cache())
 
     def test_define_key_with_invalid_keep_in_cache(
         self,
@@ -368,14 +311,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                key_definition.name,
-                key_definition.keys_store,
-                key_definition.is_stateless(),
-                key_definition.use_case,
-                key_definition.is_target_data_accessible(),
-                "aaa",
-            )
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.use_case,
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             "aaa")
 
     def test_define_key_with_invalid_strategy(
         self,
@@ -385,15 +323,9 @@ class TestDefineKey:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(
-                key_definition.name,
-                key_definition.keys_store,
-                key_definition.is_stateless(),
-                key_definition.use_case,
-                key_definition.is_target_data_accessible(),
-                True,
-                True,
-            )
+            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.use_case,
+                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
+                                             True, True)
 
 
 @mark.unittest
@@ -1555,15 +1487,9 @@ class TestKeyManagementImpl:
     ):
 
         for key_def in [stateless_key_def, stated_key_def]:
-            empty_keys_management.define_key(
-                key_def.name,
-                key_def.keys_store,
-                key_def.is_stateless(),
-                key_def.use_case,
-                key_def.is_target_data_accessible(),
-                key_def.is_keep_in_cache(),
-                key_def.on_key_changed_callback_error_strategy,
-            )
+            empty_keys_management.define_key(key_def.name, key_def.keys_store, key_def.use_case, key_def.is_stateless(),
+                                             key_def.is_target_data_accessible(), key_def.is_keep_in_cache(),
+                                             key_def.on_key_changed_callback_error_strategy)
 
         # arrange
         mocked_crypto_tool.decrypt.side_effect = lambda data: data
@@ -1598,15 +1524,9 @@ class TestKeyManagementImpl:
     ):
 
         for key_def in [stateless_key_def, stated_key_def]:
-            empty_keys_management.define_key(
-                key_def.name,
-                key_def.keys_store,
-                key_def.is_stateless(),
-                key_def.use_case,
-                key_def.is_target_data_accessible(),
-                key_def.is_keep_in_cache(),
-                key_def.on_key_changed_callback_error_strategy,
-            )
+            empty_keys_management.define_key(key_def.name, key_def.keys_store, key_def.use_case, key_def.is_stateless(),
+                                             key_def.is_target_data_accessible(), key_def.is_keep_in_cache(),
+                                             key_def.on_key_changed_callback_error_strategy)
 
         # arrange
         mocked_crypto_tool.decrypt.side_effect = lambda data: data

@@ -18,11 +18,12 @@ class CallbackStatus(Enum):
 if TYPE_CHECKING:
     from .secret_key import SecretKeyPairValues
     from .secret_key.key_definition import SecretKeyDefinition
-
+    OldKeys = SecretKeyPairValues
+    newKeys = SecretKeyPairValues
     KeyChangedCallback = Callable[
         [
-            Union[SecretKeyPairValues],
-            Union[SecretKeyPairValues],
+            OldKeys,
+            newKeys,
             OnChangeKeyDefinition,
         ],
         None,
