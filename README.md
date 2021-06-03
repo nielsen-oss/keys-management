@@ -78,7 +78,7 @@ An application could have some security constraints in regards to using secret k
 4. states repo - keys and values state can be saved and restored from an external repository
 
 
-## How to Manage keys rotation 
+# How to Manage keys rotation 
 The keys store is like a proxy or helper function to get the actual values. 
 Thus, the client should know when the key is going to be changed. 
 In most scenarios, when an application's administrator would like to rotate the application keys, he would like to insure
