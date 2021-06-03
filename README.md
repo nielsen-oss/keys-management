@@ -4,18 +4,17 @@ pip package: https://pypi.org/project/keys-management/
 [![On Pull Request](https://github.com/nielsen-oss/keys-management/actions/workflows/pr_ci.yaml/badge.svg?branch=main)](https://github.com/nielsen-oss/keys-management/actions/workflows/pr_ci.yaml)
 [![Python package](https://github.com/nielsen-oss/keys-management/actions/workflows/push_ci.yaml/badge.svg?branch=main)](https://github.com/nielsen-oss/keys-management/actions/workflows/push_ci.yaml)
 
-KeysManagemets is a layer tool to ease the usage of application secret keys when the client's application need to meet
+keys-managemet is a layer tool to ease the usage of application secret keys when the client's application need to meet
 strict security constrains and standards such as: secret key has one specific use case and can be rotated anytime. 
 
-At first, it allows defining multiple secret keys, when each key can be defined from different source.
-After keys were defined, the library helps fetch the secret key value (depend on the use case is described below) and manage 
+At first, it allows defining multiple secret keys, where each key can be defined from a different source.
+After keys were defined, the library helps fetch the secret key value (depends on the use case described below) and manage 
 rotation when a key is changed.
-An optional feature, it can help the client maintains a state when some objects were encrypted before application goes down
+It also provides a way for clients to maintain a state when some objects were encrypted before the application goes down
 while the key can be lost or changed during the downtime.
 
 ### General Usage
 
-First, for the demo purpse, let define some variables
 ```python
 from keys_management import KeysManagementImpl, OnChangeKeyDefinition, SecretKeyUseCase
 from unittest.mock import Mock
@@ -62,13 +61,12 @@ assert keys_management.get_key(KEY_NAME) == SECOND_VALUE
 ```
 
 # When to use
-Keys Management should be used when the host application should meet some security constrains, but in the other hand 
-flexibility and decoupling are your guidelines.
+Keys Management should be used when the host application needs to meet some security constraints, but still maintain flexibility and decoupling.
 
 ## Security constraints
-An application could have some security constrains regard using secret keys and credentials
-1. Use different key for each target object or client, so in case specific key is stolen, all others objects are kept safe.
-2. Key can be changed or rotated anytime, so fresh keys can be maintained all the time.
+An application could have some security constraints in regards to using secret keys and credentials
+1. Use different key for each target object or client, so in case a specific key is stolen, all other objects are kept safe.
+2. Key can be changed or rotated at anytime, so fresh keys can be maintained all the time.
 3. When an application is crashed or exited, the keys cannot be lost so encrypted data could be decrypted.
 4. The key content should be accessed only on demand, for example it should not even <??> in memory  
 
@@ -96,7 +94,7 @@ There are few reasons why to use a secret key:
 * **SecretKeyUseCase** - The specific use-case the key is used for: encryption, decryption or AAA (Authentication, 
    Authorization & Accountability)
 
-* **SecretKeyValue** - As its name revealed, is the key's content, the actual concrete value and its type is string or bytes
+* **SecretKeyValue** - key's content, the actual concrete value and its type is string or bytes
 
 * **SecretKey** - A single SecretKeyValue wrapper that expose the value as the real value or as censored so can be used for 
    logging and debugging.
@@ -158,13 +156,12 @@ If the keys marked as "stated" and it is important for the client to maintains t
 
 # keys rotation 
 The keys store is like a proxy or helper function to get the actual values. 
-Thus, the client should know when the key is goning to be changed. 
+Thus, the client should know when the key is going to be changed. 
 In most scenarios, when an application's administrator would like to rotate the application keys, he would like to insure
-ll the important encrypted objects that can be accessed anytime, will not be loss due the change. 
+that the important encrypted objects that can be accessed anytime, will not be loss due the change. 
 Thus, the administrator can register callbacks to run after keys are changed. 
 Before the store is ready to be called to get the new values, KeyChanged should be called. 
 After KeyChanged declared, all the callbacks are executed. 
-
 
 
 
