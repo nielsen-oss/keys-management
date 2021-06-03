@@ -5,7 +5,7 @@ pip package: https://pypi.org/project/keys-management/
 [![Python package](https://github.com/nielsen-oss/keys-management/actions/workflows/push_ci.yaml/badge.svg?branch=main)](https://github.com/nielsen-oss/keys-management/actions/workflows/push_ci.yaml)
 
 keys-managemet is a layer tool to ease the usage of application secret keys when the client's application need to meet
-strict security constrains and standards such as: secret key has one specific use case and can be rotated anytime. 
+strict security constraints and standards for example: secret key has one specific use case and can be rotated anytime. 
 
 At first, it allows defining multiple secret keys, where each key can be defined from a different source.
 After keys were defined, the library helps fetch the secret key value (depends on the use case described below) and manage 
@@ -162,6 +162,5 @@ that the important encrypted objects that can be accessed anytime, will not be l
 Thus, the administrator can register callbacks to run after keys are changed. 
 Before the store is ready to be called to get the new values, KeyChanged should be called. 
 After KeyChanged declared, all the callbacks are executed. 
-
 
 
