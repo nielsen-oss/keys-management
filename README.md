@@ -68,27 +68,25 @@ An application could have some security constraints in regards to using secret k
 1. Use different key for each target object or client, so in case a specific key is stolen, all other objects are kept safe.
 2. Key can be changed or rotated at anytime, so fresh keys can be maintained all the time.
 3. When an application is crashed or exited, the keys cannot be lost so encrypted data could be decrypted.
-4. The key content should be accessed only on demand, for example it should not even <??> in memory  
+4. The key content should be accessed only on demand, for example it should not even exist in memory  
 
 ## Flexibility and decoupling requirements
 1. Each secret key value can be originated from different source, so one can be taken from environment value, 
    configurations files, remote service and etc.
-2. The secret key kind such as Symmetric or Asymmetric can be ???
+2. Secret key type such as Symmetric or Asymmetric can be used
 3. Multiple worker's environment application would not lead to data loss.
-4. states repo - ???
+4. states repo - keys and values state can be saved and restored from an external repository
 
-# Scenarios 
-There are few reasons why to use a secret key: 
-1. Encryption-Decryption - When we would like to achieve data confidentiality, secret keys are processed to encrypt and 
-   decrypt the data. one key is for encryption and one for decryption. As opposed to using an asymmetric-key algorithm
-   so the encryption and decryption keys are different, with Symmetric-key algorithm, the encryption and decryption keys
-   are the same, but the keys still can be referred to as one single key for both purposes or as pair with the 
-   same values. the questions that arise are what happens when the decrypt key is changed before the data is decrypted 
-   and when the client detects the key was changed but its data can't be accessed immediately, 
-   how the client manage rotation? 
-2. Authentication, Authorization & Accountability - Whether the secret key is used for signing the data, 
-   authenticate other users or sending our credentials like a password, the type of the key (password, symmetric or 
-   asymmetric) doesn't really matter since only one key is playing the role of process.
+
+## How to Manage keys rotation 
+The keys store is like a proxy or helper function to get the actual values. 
+Thus, the client should know when the key is going to be changed. 
+In most scenarios, when an application's administrator would like to rotate the application keys, he would like to insure
+that the important encrypted objects that can be accessed anytime, will not be loss due the change. 
+Thus, the administrator can register callbacks to run after keys are changed. 
+Before the store is ready to be called to get the new values, KeyChanged should be called. 
+After KeyChanged declared, all the callbacks are executed. 
+
    
 # Domain terminology
 |   	|   	|
@@ -111,9 +109,26 @@ There are few reasons why to use a secret key:
 
 
 
-# flows 
 
-The key definitions properties effect the actual value will be returned when the use-case is Encryption-Decryption and the purpose was passed to get_key.
+# Advanced
+
+## Why to use
+There are few reasons why to use a secret key: 
+1. Encryption-Decryption - When we would like to achieve data confidentiality, secret keys are processed to encrypt and 
+   decrypt the data. one key is for encryption and one for decryption. As opposed to using an asymmetric-key algorithm
+   so the encryption and decryption keys are different, with Symmetric-key algorithm, the encryption and decryption keys
+   are the same, but the keys still can be referred to as one single key for both purposes or as pair with the 
+   same values. the questions that arise are what happens when the decrypt key is changed before the data is decrypted 
+   and when the client detects the key was changed but its data can't be accessed immediately, 
+   how the client manage rotation? 
+2. Authentication, Authorization & Accountability - Whether the secret key is used for signing the data, 
+   authenticate other users or sending our credentials like a password, the type of the key (password, symmetric or 
+   asymmetric) doesn't really matter since only one key is playing the role of process.
+
+
+## key internal flows 
+
+The key definitions properties effect the actual value will be returned when the scenario is Encryption-Decryption and the purpose was passed to get_key.
 You can pass the purpose explicit or implicit by calling get_decrypt_key/get_encrypt_key.
 When the purpose is not passed, the keys management will determine by itself, based on the previous use.
 When the previous keys is not defined it will try to fetch it from the states repository only when the key is defined as "stated"
@@ -131,14 +146,3 @@ After current purpose is determined,
 
    Button line - when the key is changed, but it defined to keep in cache, keys management helps you not losing the encrypted objects since the it keep the last decrypt key!  
 If the keys marked as "stated" and it is important for the client to maintains the state in the repository, it should call the save state immediate after getting the key. 
-
-# keys rotation 
-The keys store is like a proxy or helper function to get the actual values. 
-Thus, the client should know when the key is going to be changed. 
-In most scenarios, when an application's administrator would like to rotate the application keys, he would like to insure
-that the important encrypted objects that can be accessed anytime, will not be loss due the change. 
-Thus, the administrator can register callbacks to run after keys are changed. 
-Before the store is ready to be called to get the new values, KeyChanged should be called. 
-After KeyChanged declared, all the callbacks are executed. 
-
-
