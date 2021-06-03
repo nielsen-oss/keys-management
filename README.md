@@ -91,8 +91,7 @@ After KeyChanged declared, all the callbacks are executed.
 # Domain terminology
 |   	|   	|
 |---	|---	|
-|  **SecretKeyUseCase** 	|  The specific use-case the key is used for: encryption, decryption or AAA (Authentication, 
-   Authorization & Accountability) 	|
+|  **SecretKeyUseCase** 	|  The specific use-case the key is used for: encryption, decryption or AAA (Authentication, Authorization & Accountability) 	|
 |  **SecretKeyValue** 	    |  Key's content, the actual concrete value and its type is string or bytes 	|
 |  **SecretKey**	        |  A single SecretKeyValue wrapper that expose the value as the real value or as censored so can be used for logging and debugging 	|
 |  **SecretKeyPairValues** 	|  As describe in encryption-decryption above, two keys values related to each other. as describe above, in the case of symmetric key, it can be represented as a single key or two same values, so the actual object type can be a single value or as a tuple 	|
