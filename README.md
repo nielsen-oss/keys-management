@@ -91,46 +91,24 @@ There are few reasons why to use a secret key:
    asymmetric) doesn't really matter since only one key is playing the role of process.
    
 # Domain terminology
-* **SecretKeyUseCase** - The specific use-case the key is used for: encryption, decryption or AAA (Authentication, 
-   Authorization & Accountability)
+|   	|   	|
+|---	|---	|
+|  **SecretKeyUseCase** 	|  The specific use-case the key is used for: encryption, decryption or AAA (Authentication, 
+   Authorization & Accountability) 	|
+|  **SecretKeyValue** 	    |  Key's content, the actual concrete value and its type is string or bytes 	|
+|  **SecretKey**	        |  A single SecretKeyValue wrapper that expose the value as the real value or as censored so can be used for logging and debugging 	|
+|  **SecretKeyPairValues** 	|  As describe in encryption-decryption above, two keys values related to each other. as describe above, in the case of symmetric key, it can be represented as a single key or two same values, so the actual object type can be a single value or as a tuple 	|
+|  **SecretKeyPair** 	    |  A wrapper of two SecretKey, related each other 	|
+|  **keysStore**	        |  A function without arguments that its jobs to return a SecretKeyPairValues of specific target 	|
+|  **SecretKeyState**     	|  For specific defined key, what was the previous use case is used for, and its previous SecretKeyPairValues 	|
+|  **KeyChangedCallback** 	|  A callback (function) that called when a key is declared that it's values were changed. the callback is called with the old and new keys and OnChangeKeyDefinition 	|
+|  **OnChangeKeyDefinition**|  A SecretKeyState wrapper with read access to the original key_definition  	|
+|  **OnKeyChangedCallbackErrorStrategy** 	|  Which strategy should be operated on error. <br> - RAISE_IMMEDIATELY <br>- Raise the error immediately <br>- SKIP_AND_RAISE <br>- Skip to next callback, but in the end raise an error <br>- SKIP - Skip to next callbac <br>- HALT - Halt callback executions without raising an error  |
+|  **SecretKeyDefinition**  |   set of key,values properties describing specific secret key, how it should be used and maintained<br>- store  - It's specific keysStore<br>- use_case  	-   What is the main purpose/senario/use-case. there are two options: Encryption-Decryption or AAA<br>- stateless  -   ndication if the key should be stated or not in the defined states' repository <br>- target_data_accessible -  Indication if the target data/object/client the key is processed on, can be access by the client whenever it required<br>- keep_in_cache |Indication if the key should be stated or not in the memory or any other cache tool |
+|  **CallbackStatus**       |   KeyChangedCallback status execution: PENDING, IN_PROGRESS, FAILED and SUCCEEDED	|
+|  **StateRepoInterface**	|   TODO	|
+|  **CryptoTool**	        |  TODO 	|
 
-* **SecretKeyValue** - key's content, the actual concrete value and its type is string or bytes
-
-* **SecretKey** - A single SecretKeyValue wrapper that expose the value as the real value or as censored so can be used for 
-   logging and debugging.
-
-* **SecretKeyPairValues** - As describe in encryption-decryption above, two keys values related to each other. as described
-   above, in the case of symmetric key, it can be represented as a single key or two same values, 
-   so the actual object type can be a single value or as a tuple.
-
-* **SecretKeyPair** - A wrapper of two SecretKey, related each other. 
-
-* **keysStore** - A function without arguments that its jobs to return a SecretKeyPairValues of specific target.  
-
-* **SecretKeyState** - For specific defined key, what was the previous use case is used for, and its previous SecretKeyPairValues
-
-* **KeyChangedCallback** - A callback (function) that called when a key is declared that it's values were changed. 
-   the callback is called with the old and new keys and OnChangeKeyDefinition
-
-* **OnChangeKeyDefinition** - A SecretKeyState wrapper with read access to the original key_definition  
-
-* **OnKeyChangedCallbackErrorStrategy** - as its name revealed what strategy should be operated on error.  
-   - RAISE_IMMEDIATELY - Raise the error immediately 
-   - SKIP_AND_RAISE - Skip to next callback, but in the end raise an error
-   - SKIP - Skip to next callback
-   - HALT - Halt callback executions without raising an error 
-
-* **SecretKeyDefinition** - set of key,values properties describing specific secret key, how it should be used and maintained.
-   - store - It's specific keysStore.
-   - use_case - What is the main purpose/senario/use-case. there are two options: Encryption-Decryption or AAA.
-   - stateless - Indication if the key should be stated or not in the defined states' repository.
-   - target_data_accessible - Indication if the target data/object/client the key is processed on, can be access by the 
-      client whenever it required.
-   - keep_in_cache - Indication if the key should be stated or not in the memory or any other cache tool.
-* **CallbackStatus** - KeyChangedCallback status execution: PENDING, IN_PROGRESS, FAILED and SUCCEEDED.
-
-* **StateRepoInterface** - TODO
-* **CryptoTool** = TODO 
 
 
 # flows 
