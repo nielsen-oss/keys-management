@@ -1,19 +1,11 @@
 from __future__ import annotations
-from typing import cast, Dict, Optional, Any
+from typing import Any, Dict, Optional, cast
 from unittest.mock import ANY, Mock
 from pytest import fixture, mark, raises
 from pytest_mock import MockerFixture
-from keys_management import (
-    CryptoTool,
-    GetKeyError,
-    KeyChangedError,
-    KeyIsNotDefinedError,
-    KeysManagement,
-    KeysManagementImpl,
-    SecretKeyDefinitionInitError,
-    SecretKeyUseCase,
-    StateRepoInterface,
-)
+from keys_management import (CryptoTool, GetKeyError, KeyChangedError,
+    KeyIsNotDefinedError, KeysManagement, KeysManagementImpl,
+    SecretKeyDefinitionInitError, SecretKeyUseCase, StateRepoInterface,)
 from keys_management.consts import KEY, STATE
 from tests import KeyDefForTest
 

@@ -2,17 +2,19 @@ from __future__ import annotations
 import inspect
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Dict, Optional, Any, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 from unittest.mock import Mock
 from ..errors import OnKeyChangedCallbackErrorStrategy
-from .consts import USE_CASE_ARG, STATELESS_ARG, TARGET_DATA_ACCESSIBLE_PROP, TARGET_DATA_ACCESSIBLE_ARG, \
-    KEEP_IN_CACHE_ARG, CALLBACK_ERROR_STRATEGY_ARG, NAME_PROPERTY_IS_EMPTY_MSG, STORE_IS_NOT_CALLABLE_MSG, \
-    SHOULD_NOT_CONTAINS_ARGS_MSG, USE_CASE_PROP_TYPE_ERR, STATELESS_NOT_BOOL_ERR_MSG, \
-    TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG, KEEP_IN_CACHE_NOT_BOOL_ERR_MSG, ERROR_STRATEGY_TYPE_ERR_MSG, NAME_PROP, \
-    USE_CASE_PROP, STATELESS_PROP, KEEP_IN_CACHE_PROP, LAST_USE_PROP
+from .consts import (CALLBACK_ERROR_STRATEGY_ARG, ERROR_STRATEGY_TYPE_ERR_MSG,
+    KEEP_IN_CACHE_ARG, KEEP_IN_CACHE_NOT_BOOL_ERR_MSG, KEEP_IN_CACHE_PROP,
+    LAST_USE_PROP, NAME_PROP, NAME_PROPERTY_IS_EMPTY_MSG, SHOULD_NOT_CONTAINS_ARGS_MSG,
+    STATELESS_ARG, STATELESS_NOT_BOOL_ERR_MSG, STATELESS_PROP,
+    STORE_IS_NOT_CALLABLE_MSG, TARGET_DATA_ACCESSIBLE_ARG,
+    TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG, TARGET_DATA_ACCESSIBLE_PROP, USE_CASE_ARG,
+    USE_CASE_PROP, USE_CASE_PROP_TYPE_ERR,)
 from .errors import InitError
 from .key_state import SecretKeyState
-from .secret_key import SecretKeyPair, SecretKey, SecretKeyFactory
+from .secret_key import SecretKey, SecretKeyFactory, SecretKeyPair
 from .secret_key_use_case import SecretKeyUseCase
 
 if TYPE_CHECKING:

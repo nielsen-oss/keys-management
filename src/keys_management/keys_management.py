@@ -1,38 +1,18 @@
 from __future__ import annotations
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, Optional, cast, Union
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Union, cast
 from .consts import KEY, STATE, TRACE_LEVEL, TRACE_LEVEL_NAME
 from .dependecies import CryptoTool, StateRepoInterface
-from .errors import (
-    FetchAndSetStateFromRepoError,
-    GetKeyError,
-    InvalidKeyStateError,
-    KeyChangedError,
-    KeyIsNotDefinedError,
-    OnKeyChangedCallbackErrorStrategy,
-)
+from .errors import (FetchAndSetStateFromRepoError, GetKeyError, InvalidKeyStateError,
+    KeyChangedError, KeyIsNotDefinedError, OnKeyChangedCallbackErrorStrategy,)
 from .key_changed_utils import KeyChangedContext
-from .log_messages_consts import (
-    CLEAN_KEYS_LOG_FORMAT,
-    CLEAN_PREV_KEYS_LOG_FORMAT,
-    DEFINE_KEY_LOG_FORMAT,
-    GET_KEY_DEBUG_FORMAT,
-    GET_KEY_INFO_FORMAT,
-    KEY_CHANGED_DEBUG_FORMAT,
-    KEY_CHANGED_INFO_FORMAT,
-    ON_HALT_LOG_FORMAT,
-    ON_SKIP_LOG_FORMAT,
-    REGISTER_ON_CHANGE_LOG_FORMAT,
-    RV_KEY_LOG_FORMAT,
-    SUCCESS_DEFINE_KEY_LOG_FORMAT,
-)
-from .secret_key import (
-    InvalidUseCaseNameError,
-    SecretKey,
-    SecretKeyDefinition,
-    SecretKeyPair,
-    SecretKeyUseCase,
-)
+from .log_messages_consts import (CLEAN_KEYS_LOG_FORMAT, CLEAN_PREV_KEYS_LOG_FORMAT,
+    DEFINE_KEY_LOG_FORMAT, GET_KEY_DEBUG_FORMAT, GET_KEY_INFO_FORMAT,
+    KEY_CHANGED_DEBUG_FORMAT, KEY_CHANGED_INFO_FORMAT, ON_HALT_LOG_FORMAT,
+    ON_SKIP_LOG_FORMAT, REGISTER_ON_CHANGE_LOG_FORMAT, RV_KEY_LOG_FORMAT,
+    SUCCESS_DEFINE_KEY_LOG_FORMAT,)
+from .secret_key import (InvalidUseCaseNameError, SecretKey, SecretKeyDefinition,
+    SecretKeyPair, SecretKeyUseCase,)
 
 if TYPE_CHECKING:
     from .key_changed_utils import KeyChangedCallback

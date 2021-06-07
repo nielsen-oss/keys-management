@@ -1,14 +1,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Optional, Union
-from .secret_key import (
-    BaseSecretKeyDefinition,
-    InitError,
-    SecretKeyState,
-    SecretKeyUseCase,
-)
+from .secret_key import (BaseSecretKeyDefinition, InitError, SecretKeyState,
+    SecretKeyUseCase,)
 
 if TYPE_CHECKING:
-    from .secret_key import KeysStore, SecretKey, SecretKeyPair, SecretKeyValue, SecretKeyPairValues
+    from .secret_key import (KeysStore, SecretKey, SecretKeyPair, SecretKeyPairValues,
+        SecretKeyValue,)
 
 
 class OnChangeKeyDefinition(SecretKeyState):

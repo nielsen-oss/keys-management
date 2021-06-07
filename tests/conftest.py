@@ -1,13 +1,9 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, List, Tuple, Callable
+from typing import TYPE_CHECKING, Callable, List, Tuple
 from pytest import fixture
 from pytest_mock import MockerFixture
-from keys_management import (
-    CryptoTool,
-    KeysManagement,
-    OnKeyChangedCallbackErrorStrategy,
-    StateRepoInterface,
-)
+from keys_management import (CryptoTool, KeysManagement,
+    OnKeyChangedCallbackErrorStrategy, StateRepoInterface,)
 from keys_management.secret_key import SecretKeyUseCase
 from . import KeyDefForTest
 

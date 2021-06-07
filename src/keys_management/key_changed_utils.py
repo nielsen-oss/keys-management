@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Dict, Any
+from typing import TYPE_CHECKING, Any, Callable, Dict
 from .errors import KeyChangedError, OnKeyChangedCallbackErrorStrategy
 from .on_change_key_definition import OnChangeKeyDefinition
 

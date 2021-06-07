@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Tuple, Union, Any
+from typing import Any, Dict, Optional, Tuple, Union
 from unittest import mock
 from keys_management.secret_key import BaseSecretKeyDefinition, SecretKeyState
 
