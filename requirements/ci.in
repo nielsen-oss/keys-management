@@ -1,10 +1,6 @@
 -r test.in
 
 build
-mypy
-pylint
 twine
-build
 bump2version
-pip-compile-multi
 Sphinx

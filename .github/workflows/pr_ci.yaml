@@ -20,7 +20,7 @@ jobs:
         run: pwd & python3 -m pip install .
       - name: Unittests With Pytest
         run: |
-          pytest -m unittest --suppress-no-test-exit-code
+          pytest -m unittest --suppress-no-test-exit-code -vvv
       - name: Integration Tests With Ptest
         run: |
           pytest -m integrationtest --suppress-no-test-exit-code
