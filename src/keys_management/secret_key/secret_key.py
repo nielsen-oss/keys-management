@@ -36,7 +36,7 @@ class SecretKey:
         return (
             str_to_censor[0:revealedPartSize]
             + "*" * (key_length - 2 * revealedPartSize)
-            + str_to_censor[key_length - revealedPartSize:]
+            + str_to_censor[key_length - revealedPartSize :]
         )
 
 
@@ -92,7 +92,9 @@ class SecretKeyPair:
 
 class SecretKeyFactory:
     @staticmethod
-    def create(value_or_values: Optional[Union[SecretKeyValue, SecretKeyPairValues]]) -> Optional[Union[SecretKey, SecretKeyPair]]:
+    def create(
+        value_or_values: Optional[Union[SecretKeyValue, SecretKeyPairValues]]
+    ) -> Optional[Union[SecretKey, SecretKeyPair]]:
         if value_or_values is None:
             return None
         if isinstance(value_or_values, (str, bytes)):
@@ -101,7 +103,9 @@ class SecretKeyFactory:
             return SecretKeyPair(value_or_values)
         raise SecretKeyPairInitError(value_or_values)
 
-    def __call__(self, value_or_values: Union[SecretKeyValue, SecretKeyPairValues]) -> Optional[Union[SecretKey, SecretKeyPair]]:
+    def __call__(
+        self, value_or_values: Union[SecretKeyValue, SecretKeyPairValues]
+    ) -> Optional[Union[SecretKey, SecretKeyPair]]:
         return self.create(value_or_values)
 
 

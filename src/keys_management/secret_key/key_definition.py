@@ -35,7 +35,9 @@ class BaseSecretKeyDefinition(ABC):
     def __init__(self, name: str, keys_store: KeysStore, **kwargs: Any):
         self._name = name
         self._keys_store = keys_store
-        self._use_case = kwargs.get(USE_CASE_ARG, SecretKeyUseCase.ENCRYPTION_DECRYPTION)
+        self._use_case = kwargs.get(
+            USE_CASE_ARG, SecretKeyUseCase.ENCRYPTION_DECRYPTION
+        )
         self._stateless = kwargs.get(STATELESS_ARG, True)
         self._target_data_accessible = kwargs.get(TARGET_DATA_ACCESSIBLE_ARG, True)
         self._keep_in_cache = kwargs.get(KEEP_IN_CACHE_ARG, True)
@@ -107,7 +109,9 @@ class BaseSecretKeyDefinition(ABC):
         pass
 
     @property
-    def on_key_changed_callback_error_strategy(self,) -> OnKeyChangedCallbackErrorStrategy:
+    def on_key_changed_callback_error_strategy(
+        self,
+    ) -> OnKeyChangedCallbackErrorStrategy:
         return self._on_key_changed_callback_error_strategy
 
     def __str__(self) -> str:
@@ -152,7 +156,12 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
     def previous_keys(self) -> KeyContent:
         return self._previous_keys
 
-    def set_previous_keys(self, keys: Optional[Union[SecretKeyValue, SecretKeyPairValues, SecretKey, SecretKeyPair]]) -> None:
+    def set_previous_keys(
+        self,
+        keys: Optional[
+            Union[SecretKeyValue, SecretKeyPairValues, SecretKey, SecretKeyPair]
+        ],
+    ) -> None:
         if isinstance(keys, (SecretKey, SecretKeyPair)):
             self._current_keys = keys
         else:
@@ -190,7 +199,9 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
 
     def set_key_state(self, key_state: SecretKeyState) -> None:
         self.set_last_use_case(key_state.get_last_use_case())
-        previous_keys: Optional[Union[SecretKey, SecretKeyPair]] = key_state.get_previous_keys()
+        previous_keys: Optional[
+            Union[SecretKey, SecretKeyPair]
+        ] = key_state.get_previous_keys()
         if previous_keys != self._previous_keys and previous_keys is not None:
             self.set_previous_keys(previous_keys)
 

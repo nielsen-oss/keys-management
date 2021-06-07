@@ -34,7 +34,9 @@ class GetKeyError(KeysManagementError):
 
 
 class KeyChangedError(KeysManagementError):
-    def __init__(self, key_name: str, key_changed_context: KeyChangedContext = None) -> None:
+    def __init__(
+        self, key_name: str, key_changed_context: KeyChangedContext = None
+    ) -> None:
         super().__init__(key_name, key_changed_context)
 
     def __str__(self) -> str:

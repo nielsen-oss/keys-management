@@ -159,7 +159,9 @@ class KeysManagementImpl(KeysManagement):
         else:
             return self._get_key_authentication_case(key_definition, purpose)
 
-    def _update_key_definition_state(self, key_definition: SecretKeyDefinition, purpose: SecretKeyUseCase) -> None:
+    def _update_key_definition_state(
+        self, key_definition: SecretKeyDefinition, purpose: SecretKeyUseCase
+    ) -> None:
         # todo test it
         logger.log(TRACE_LEVEL, CLEAN_KEYS_LOG_FORMAT % key_definition.name)
         key_definition.clean_keys()

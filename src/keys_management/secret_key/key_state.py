@@ -22,7 +22,9 @@ class SecretKeyState(ABC):
         pass
 
     @abstractmethod
-    def set_previous_keys(self, keys: Union[SecretKeyValue, SecretKeyPairValues]) -> None:
+    def set_previous_keys(
+        self, keys: Union[SecretKeyValue, SecretKeyPairValues]
+    ) -> None:
         pass
 
     @abstractmethod

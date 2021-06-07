@@ -51,7 +51,9 @@ class OnChangeKeyDefinition(SecretKeyState):
     def get_previous_keys(self) -> Optional[Union[SecretKey, SecretKeyPair]]:
         return self.__state.get_previous_keys()
 
-    def set_previous_keys(self, keys: Union[SecretKeyValue, SecretKeyPairValues]) -> None:
+    def set_previous_keys(
+        self, keys: Union[SecretKeyValue, SecretKeyPairValues]
+    ) -> None:
         self.__state.set_previous_keys(keys)
 
     def clean_state(self) -> None:

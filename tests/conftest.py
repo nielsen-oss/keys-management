@@ -9,6 +9,7 @@ from . import KeyDefForTest
 
 if TYPE_CHECKING:
     from keys_management.secret_key import KeysStore
+
     KeyDefinitionFactory = Callable[..., KeyDefForTest]
 
 
@@ -98,7 +99,9 @@ def convert_key_name_to_value(name: str) -> str:
 
 
 @fixture
-def DE_stated_not_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+def DE_stated_not_accessible(
+    key_definition_factory: KeyDefinitionFactory,
+) -> KeyDefForTest:
     key_name = "DE_stated_not_accessible"
     return key_definition_factory(
         name=key_name,
@@ -124,7 +127,9 @@ def DE_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDef
 
 
 @fixture
-def DE_stateless_not_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+def DE_stateless_not_accessible(
+    key_definition_factory: KeyDefinitionFactory,
+) -> KeyDefForTest:
     key_name = "DE_stateless_not_accessible"
     return key_definition_factory(
         name=key_name,
@@ -137,7 +142,9 @@ def DE_stateless_not_accessible(key_definition_factory: KeyDefinitionFactory) ->
 
 
 @fixture
-def DE_stateless_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+def DE_stateless_accessible(
+    key_definition_factory: KeyDefinitionFactory,
+) -> KeyDefForTest:
     key_name = "DE_stateless_accessible"
     return key_definition_factory(
         name=key_name,
@@ -150,7 +157,9 @@ def DE_stateless_accessible(key_definition_factory: KeyDefinitionFactory) -> Key
 
 
 @fixture
-def DE_not_cached_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+def DE_not_cached_accessible(
+    key_definition_factory: KeyDefinitionFactory,
+) -> KeyDefForTest:
     key_name = "DE_not_cached_accessible"
     return key_definition_factory(
         name=key_name,
@@ -163,7 +172,9 @@ def DE_not_cached_accessible(key_definition_factory: KeyDefinitionFactory) -> Ke
 
 
 @fixture
-def DE_not_cached_not_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+def DE_not_cached_not_accessible(
+    key_definition_factory: KeyDefinitionFactory,
+) -> KeyDefForTest:
     key_name = "DE_not_cached_not_accessible"
     return key_definition_factory(
         name=key_name,
@@ -176,7 +187,9 @@ def DE_not_cached_not_accessible(key_definition_factory: KeyDefinitionFactory) -
 
 
 @fixture
-def A_stated_not_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+def A_stated_not_accessible(
+    key_definition_factory: KeyDefinitionFactory,
+) -> KeyDefForTest:
     key_name = "A_stated_not_accessible"
     key_val = convert_key_name_to_value(key_name)
     return key_definition_factory(
@@ -206,7 +219,9 @@ def A_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefF
 
 
 @fixture
-def A_stateless_not_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+def A_stateless_not_accessible(
+    key_definition_factory: KeyDefinitionFactory,
+) -> KeyDefForTest:
     key_name = "A_stateless_not_accessible"
     key_val = convert_key_name_to_value(key_name)
     return key_definition_factory(
@@ -221,7 +236,9 @@ def A_stateless_not_accessible(key_definition_factory: KeyDefinitionFactory) -> 
 
 
 @fixture
-def A_stateless_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+def A_stateless_accessible(
+    key_definition_factory: KeyDefinitionFactory,
+) -> KeyDefForTest:
     key_name = "A_stateless_accessible"
     key_val = convert_key_name_to_value(key_name)
     return KeyDefForTest(
@@ -256,7 +273,9 @@ def stated_key_def(stated_key_name: str, stated_key: str) -> KeyDefForTest:
 
 
 @fixture
-def halt_error_strategy_key_def(stateless_key_name: str, stateless_key: str) -> KeyDefForTest:
+def halt_error_strategy_key_def(
+    stateless_key_name: str, stateless_key: str
+) -> KeyDefForTest:
     name = "HALT_KEY_DEF"
     return KeyDefForTest(
         name=name,
@@ -268,7 +287,9 @@ def halt_error_strategy_key_def(stateless_key_name: str, stateless_key: str) -> 
 
 
 @fixture
-def skip_error_strategy_key_def(stateless_key_name: str, stateless_key: str) -> KeyDefForTest:
+def skip_error_strategy_key_def(
+    stateless_key_name: str, stateless_key: str
+) -> KeyDefForTest:
     name = "SKIP_KEY_DEF"
     return KeyDefForTest(
         name=name,
@@ -280,7 +301,9 @@ def skip_error_strategy_key_def(stateless_key_name: str, stateless_key: str) -> 
 
 
 @fixture
-def skip_raise_error_strategy_key_def(stateless_key_name: str, stateless_key: str) -> KeyDefForTest:
+def skip_raise_error_strategy_key_def(
+    stateless_key_name: str, stateless_key: str
+) -> KeyDefForTest:
     name = "SKIP_AND_RAISE_KEY_DEF"
     return KeyDefForTest(
         name=name,
@@ -292,7 +315,9 @@ def skip_raise_error_strategy_key_def(stateless_key_name: str, stateless_key: st
 
 
 @fixture
-def raise_error_strategy_key_def(stateless_key_name: str, stateless_key: str) -> KeyDefForTest:
+def raise_error_strategy_key_def(
+    stateless_key_name: str, stateless_key: str
+) -> KeyDefForTest:
     name = "RAISE_KEY_DEF"
     return KeyDefForTest(
         name=name,
