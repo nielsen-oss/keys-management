@@ -1,24 +1,24 @@
 from typing import TYPE_CHECKING
-from .keys_management import KeysManagement, KeysManagementImpl
+from .dependecies import CryptoTool, StateRepoInterface
 from .errors import (
-    KeysManagementError,
     GetKeyError,
-    KeyIsNotDefinedError,
     KeyChangedError,
+    KeyIsNotDefinedError,
+    KeysManagementError,
 )
 from .key_changed_utils import OnKeyChangedCallbackErrorStrategy
-from .dependecies import CryptoTool, StateRepoInterface
+from .keys_management import KeysManagement, KeysManagementImpl
 from .on_change_key_definition import (
     OnChangeKeyDefinition,
     OnChangeKeyDefinitionInitError,
 )
 from .secret_key import (
     BaseSecretKeyDefinition,
-    SecretKeyUseCase,
     InvalidUseCaseNameError,
     SecretKeyDefinitionInitError,
+    SecretKeyUseCase,
 )
 
 if TYPE_CHECKING:
-    from .secret_key import KeysStore, SecretKeyValue, SecretKeyPairValues
     from .key_changed_utils import KeyChangedCallback
+    from .secret_key import KeysStore, SecretKeyPairValues, SecretKeyValue

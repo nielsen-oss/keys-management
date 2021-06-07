@@ -1,15 +1,16 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
 
 if TYPE_CHECKING:
+    from .secret_key import SecretKey, SecretKeyPair
     from .secret_key_use_case import SecretKeyUseCase
-    from .types import SecretKeyPairValues
+    from .types import SecretKeyPairValues, SecretKeyValue
 
 
 class SecretKeyState(ABC):
     @abstractmethod
-    def get_last_use_case(self) -> SecretKeyUseCase:
+    def get_last_use_case(self) -> Optional[SecretKeyUseCase]:
         pass
 
     @abstractmethod
@@ -17,11 +18,11 @@ class SecretKeyState(ABC):
         pass
 
     @abstractmethod
-    def get_previous_keys(self) -> SecretKeyPairValues:
+    def get_previous_keys(self) -> Optional[Union[SecretKey, SecretKeyPair]]:
         pass
 
     @abstractmethod
-    def set_previous_keys(self, keys: SecretKeyPairValues):
+    def set_previous_keys(self, keys: Union[SecretKeyValue, SecretKeyPairValues]) -> None:
         pass
 
     @abstractmethod
