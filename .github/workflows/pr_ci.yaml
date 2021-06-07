@@ -14,8 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install black pytest pytest-custom_exit_code mypy pylint twine build bump2version pytest_mock
-          if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
+          python3 -m pip install -r requirements/test.txt
       - uses: actions/checkout@v2
       - name: install self
         run: pwd & python3 -m pip install .
