@@ -128,8 +128,7 @@ There are few reasons why to use a secret key:
 2. Authentication, Authorization & Accountability - Whether the secret key is used for signing the data, 
    authenticate other users or sending our credentials like a password, the type of the key (password, symmetric or 
    asymmetric) doesn't really matter since only one key is playing the role of process.
-
-
+   
 
 ## key internal flows 
 
