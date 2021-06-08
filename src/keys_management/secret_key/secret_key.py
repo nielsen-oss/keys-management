@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 from .errors import InitError, SecretKeyInitError, SecretKeyPairInitError
 
 if TYPE_CHECKING:
-    from .types import StrOrBytesPair, StrOrBytes
+    from .types import StrOrBytes, StrOrBytesPair
 
 
 class SecretKeyValue:
@@ -76,7 +76,6 @@ class SecretKeyPair:
     @property
     def decrypt_key(self) -> SecretKeyValue:
         return self._decrypt_key
-
 
     @property
     def encrypt_key(self) -> SecretKeyValue:
