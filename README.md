@@ -130,7 +130,6 @@ There are few reasons why to use a secret key:
    asymmetric) doesn't really matter since only one key is playing the role of process.
    
 
-
 ## key internal flows 
 
 The key definitions properties effect the actual value will be returned when the scenario is Encryption-Decryption and the purpose was passed to get_key.
