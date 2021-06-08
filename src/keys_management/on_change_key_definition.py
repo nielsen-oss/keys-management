@@ -16,6 +16,8 @@ if TYPE_CHECKING:
         StrOrBytesPair,
     )
 
+ERROR_MSG_FRMT = "original_key_definition type is %s"
+
 
 class OnChangeKeyDefinition(SecretKeyState):
     __original_key_definition: BaseSecretKeyDefinition
@@ -71,5 +73,5 @@ class OnChangeKeyDefinitionInitError(InitError):
     def __init__(self, original_key_definition: Any) -> None:
         super().__init__(
             "OnChangeKeyDefinition",
-            "original_key_definition type is %s" % str(type(original_key_definition)),
+            ERROR_MSG_FRMT % str(type(original_key_definition)),
         )
