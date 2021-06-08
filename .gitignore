@@ -12,4 +12,4 @@ src/*$py.class
 tests/*.py[cod]
 tests/*$py.class
 *.so
-
+.dmypy.json
