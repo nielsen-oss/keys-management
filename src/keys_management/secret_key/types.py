@@ -1,9 +1,5 @@
-from typing import Union, Tuple, Dict, Callable
+from typing import Callable, Tuple, Union
 
-SecretKeyValue = Union[str, bytes]
-SecretKeyPairValues = Union[
-    SecretKeyValue,
-    Tuple[SecretKeyValue, SecretKeyValue],
-    Dict[str, SecretKeyValue],
-]
-KeysStore = Callable[[], SecretKeyPairValues]
+StrOrBytes = Union[str, bytes]
+StrOrBytesPair = Tuple[StrOrBytes, StrOrBytes]
+KeysStore = Callable[[], Union[StrOrBytes, StrOrBytesPair]]

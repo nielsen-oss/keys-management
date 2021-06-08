@@ -1,81 +1,64 @@
 from __future__ import annotations
-from typing import Dict, Optional, TYPE_CHECKING, Callable
 import logging
-from .secret_key import (
-    SecretKeyUseCase,
-    SecretKeyDefinition,
-    SecretKey,
-    InvalidUseCaseNameError,
-    SecretKeyPair,
-)
-from .dependecies import StateRepoInterface, CryptoTool
-from .consts import TRACE_LEVEL, TRACE_LEVEL_NAME, STATE, KEY
-from .log_messages_consts import (
-    DEFINE_KEY_LOG_FORMAT,
-    SUCCESS_DEFINE_KEY_LOG_FORMAT,
-    GET_KEY_INFO_FORMAT,
-    GET_KEY_DEBUG_FORMAT,
-    RV_KEY_LOG_FORMAT,
-    KEY_CHANGED_INFO_FORMAT,
-    KEY_CHANGED_DEBUG_FORMAT,
-    REGISTER_ON_CHANGE_LOG_FORMAT,
-    ON_HALT_LOG_FORMAT,
-    ON_SKIP_LOG_FORMAT,
-    CLEAN_KEYS_LOG_FORMAT,
-    CLEAN_PREV_KEYS_LOG_FORMAT,
-)
-from .errors import (
-    KeysManagementError,
-    OnKeyChangedCallbackErrorStrategy,
-    GetKeyError,
-    KeyChangedError,
-    KeyIsNotDefinedError,
-    FetchAndSetStateFromRepoError,
-    InvalidKeyStateError,
-)
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Union, cast
+from .consts import KEY, STATE, TRACE_LEVEL, TRACE_LEVEL_NAME
+from .dependecies import CryptoTool, StateRepoInterface
+from .errors import (FetchAndSetStateFromRepoError, GetKeyError, InvalidKeyStateError,
+    KeyChangedError, KeyIsNotDefinedError, OnKeyChangedCallbackErrorStrategy,)
 from .key_changed_utils import KeyChangedContext
+from .log_messages_consts import (CLEAN_KEYS_LOG_FORMAT, CLEAN_PREV_KEYS_LOG_FORMAT,
+    DEFINE_KEY_LOG_FORMAT, GET_KEY_DEBUG_FORMAT, GET_KEY_INFO_FORMAT,
+    KEY_CHANGED_DEBUG_FORMAT, KEY_CHANGED_INFO_FORMAT, ON_HALT_LOG_FORMAT,
+    ON_SKIP_LOG_FORMAT, REGISTER_ON_CHANGE_LOG_FORMAT, RV_KEY_LOG_FORMAT,
+    SUCCESS_DEFINE_KEY_LOG_FORMAT,)
+from .secret_key import (InvalidUseCaseNameError, SecretKeyValue, SecretKeyDefinition,
+                         SecretKeyPair, SecretKeyUseCase, )
+
 if TYPE_CHECKING:
-    from .secret_key import KeysStore, SecretKeyValue, SecretKeyPairValues
     from .key_changed_utils import KeyChangedCallback
+    from .secret_key import KeysStore, StrOrBytesPair, StrOrBytes
 
 logging.addLevelName(TRACE_LEVEL, TRACE_LEVEL_NAME)
 logger = logging.getLogger(__name__)
 
-PURPOSE_IS_NOT_USECASE_TYPE_MSG = (
-    'purpose argument is not type of "SecretKeyUseCase"'
-)
-PURPOSE_IS_NOT_AUTHENTICATION_MSG = (
-    "purpose is not SecretKeyUseCase.AUTHENTICATION"
-)
-
+PURPOSE_IS_NOT_USECASE_TYPE_MSG = 'purpose argument is not type of "SecretKeyUseCase"'
+PURPOSE_IS_NOT_AUTHENTICATION_MSG = "purpose is not SecretKeyUseCase.AUTHENTICATION"
 DEFAULT_CALLBACK_NAME_FORMAT = "{}_callback_{}"
 
 
 class KeysManagement(object):
-    '''
-        This is the main interface class who exposes the library functionalities API.
-    '''
-    def define_key(self, name: str, keys_store: KeysStore, use_case: SecretKeyUseCase, stateless: bool,
-                   target_data_accessible: bool, keep_in_cache: bool,
-                   on_key_changed_callback_error_strategy: OnKeyChangedCallbackErrorStrategy = None) -> KeysManagement:
+    """
+    This is the main interface class who exposes the library functionalities API.
+    """
+
+    def define_key(
+        self,
+        name: str,
+        keys_store: KeysStore,
+        use_case: SecretKeyUseCase,
+        stateless: bool,
+        target_data_accessible: bool,
+        keep_in_cache: bool,
+        on_key_changed_callback_error_strategy: OnKeyChangedCallbackErrorStrategy = None,
+    ) -> KeysManagement:
         raise NotImplementedError()
 
     def get_key(
         self, key_name: str, purpose: SecretKeyUseCase = None
-    ) -> SecretKeyValue:
+    ) -> StrOrBytes:
         raise NotImplementedError()
 
-    def get_encrypt_key(self, key_name: str) -> SecretKeyValue:
+    def get_encrypt_key(self, key_name: str) -> StrOrBytes:
         return self.get_key(key_name, SecretKeyUseCase.ENCRYPTION)
 
-    def get_decrypt_key(self, key_name: str) -> SecretKeyValue:
+    def get_decrypt_key(self, key_name: str) -> StrOrBytes:
         return self.get_key(key_name, SecretKeyUseCase.DECRYPTION)
 
     def key_changed(
         self,
         key_name: str,
-        old_keys: SecretKeyPairValues,
-        new_keys: SecretKeyPairValues,
+        old_keys: StrOrBytesPair,
+        new_keys: StrOrBytesPair,
     ) -> None:
         raise NotImplementedError()
 
@@ -102,9 +85,7 @@ class KeysManagementImpl(KeysManagement):
         OnKeyChangedCallbackErrorStrategy, Callable
     ]
 
-    def __init__(
-        self, state_repo: StateRepoInterface, crypto_tool: CryptoTool
-    ):
+    def __init__(self, state_repo: StateRepoInterface, crypto_tool: CryptoTool):
         self._state_repo = state_repo
         self._crypto_tool = crypto_tool
         self._keys_definitions = {}
@@ -115,9 +96,16 @@ class KeysManagementImpl(KeysManagement):
             OnKeyChangedCallbackErrorStrategy.RAISE_IMMEDIATELY: KeysManagementImpl._on_raise_strategy,
         }
 
-    def define_key(self, name: str, keys_store: KeysStore, use_case: SecretKeyUseCase, stateless: bool = None,
-                   target_data_accessible: bool = None, keep_in_cache: bool = None,
-                   on_key_changed_callback_error_strategy: OnKeyChangedCallbackErrorStrategy = None) -> KeysManagement:
+    def define_key(
+        self,
+        name: str,
+        keys_store: KeysStore,
+        use_case: SecretKeyUseCase,
+        stateless: bool = None,
+        target_data_accessible: bool = None,
+        keep_in_cache: bool = None,
+        on_key_changed_callback_error_strategy: OnKeyChangedCallbackErrorStrategy = None,
+    ) -> KeysManagement:
         on_key_changed_callback_error_strategy = (
             on_key_changed_callback_error_strategy
             if on_key_changed_callback_error_strategy is not None
@@ -139,7 +127,7 @@ class KeysManagementImpl(KeysManagement):
 
     def get_key(
         self, key_name: str, purpose: SecretKeyUseCase = None
-    ) -> SecretKeyValue:
+    ) -> StrOrBytes:
         try:
             if not logger.isEnabledFor(logging.DEBUG):
                 logger.info(GET_KEY_INFO_FORMAT.format(key_name))
@@ -164,31 +152,30 @@ class KeysManagementImpl(KeysManagement):
         self,
         key_definition: SecretKeyDefinition,
         purpose: SecretKeyUseCase,
-    ):
+    ) -> SecretKeyValue:
         if key_definition.use_case == SecretKeyUseCase.ENCRYPTION_DECRYPTION:
             return self._get_key_encryption_decryption_case(key_definition, purpose)
         else:
             return self._get_key_authentication_case(key_definition, purpose)
 
-    def _update_key_definition_state(self, key_definition, purpose):
+    def _update_key_definition_state(
+        self, key_definition: SecretKeyDefinition, purpose: SecretKeyUseCase
+    ) -> None:
         # todo test it
-        logger.log(
-            TRACE_LEVEL, CLEAN_KEYS_LOG_FORMAT % key_definition.name
-        )
+        logger.log(TRACE_LEVEL, CLEAN_KEYS_LOG_FORMAT % key_definition.name)
         key_definition.clean_keys()
         key_definition.set_last_use_case(purpose)
         if self._is_clean_previous_keys(key_definition, purpose):
-            logger.log(
-                TRACE_LEVEL,
-                CLEAN_PREV_KEYS_LOG_FORMAT % key_definition.name,
+            logger.log(TRACE_LEVEL, CLEAN_PREV_KEYS_LOG_FORMAT % key_definition.name,
             )
             key_definition.clean_previous_keys()
+
 
     @staticmethod
     def _is_clean_previous_keys(
         key_definition: SecretKeyDefinition,
         current_purpose: SecretKeyUseCase,
-    ):
+    ) -> bool:
         return current_purpose == SecretKeyUseCase.AUTHENTICATION or (
             current_purpose == SecretKeyUseCase.DECRYPTION
             and not key_definition.is_keep_in_cache()
@@ -198,25 +185,25 @@ class KeysManagementImpl(KeysManagement):
         self,
         key_definition: SecretKeyDefinition,
         purpose: SecretKeyUseCase,
-    ) -> SecretKey:
+    ) -> SecretKeyValue:
         if purpose != SecretKeyUseCase.AUTHENTICATION:
             GetKeyError(
                 key_name=key_definition.name,
                 reason=PURPOSE_IS_NOT_AUTHENTICATION_MSG,
             )
-        return SecretKey(key_definition.keys_store())
+        return SecretKeyValue(cast(Union[str, bytes], key_definition.keys_store()))
 
     def _get_key_encryption_decryption_case(
         self,
         key_definition: SecretKeyDefinition,
         purpose: SecretKeyUseCase,
-    ) -> SecretKey:
+    ) -> SecretKeyValue:
         if purpose == SecretKeyUseCase.ENCRYPTION:
             return self._get_key_for_encryption(key_definition)
-        elif purpose == SecretKeyUseCase.DECRYPTION:
+        else:  # purpose == SecretKeyUseCase.DECRYPTION:
             return self._get_key_for_decryption(key_definition)
 
-    def _get_key_for_decryption(self, key_definition: SecretKeyDefinition) -> SecretKey:
+    def _get_key_for_decryption(self, key_definition: SecretKeyDefinition) -> SecretKeyValue:
         if not key_definition.has_keys():
             if (
                 key_definition.get_last_use_case() is None
@@ -227,41 +214,49 @@ class KeysManagementImpl(KeysManagement):
                     key_definition.set_keys_from_store()
             else:
                 key_definition.set_keys_from_store()
-        return key_definition.get_previous_or_current_keys().decrypt_key
+        return key_definition.get_previous_or_current_keys().decrypt_key  # type: ignore[union-attr]
 
-    def _get_key_for_encryption(self, key_definition: SecretKeyDefinition) -> SecretKey:
+    def _get_key_for_encryption(self, key_definition: SecretKeyDefinition) -> SecretKeyValue:
         key_definition.set_keys_from_store()
-        return key_definition.keys.encrypt_key
+        return key_definition.keys.encrypt_key  # type: ignore[union-attr]
 
-    def _determine_get_key_purpose(self, key_definition: SecretKeyDefinition) -> SecretKeyUseCase:
-        if key_definition.use_case not in {SecretKeyUseCase.ENCRYPTION_DECRYPTION,None}:
+    def _determine_get_key_purpose(
+        self, key_definition: SecretKeyDefinition
+    ) -> SecretKeyUseCase:
+        if key_definition.use_case not in {
+            SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+            None,
+        }:
             return key_definition.use_case
         else:
             return self.__determine_get_key_purpose_by_previous_use(key_definition)
 
-    def __determine_get_key_purpose_by_previous_use(self, key_definition: SecretKeyDefinition) -> SecretKeyUseCase:
+    def __determine_get_key_purpose_by_previous_use(
+        self, key_definition: SecretKeyDefinition
+    ) -> SecretKeyUseCase:
         prev_use = self.__get_previous_use(key_definition)
         if prev_use == SecretKeyUseCase.ENCRYPTION:
             return SecretKeyUseCase.DECRYPTION
         else:
             return SecretKeyUseCase.ENCRYPTION
 
-    def __get_previous_use(self, key_definition: SecretKeyDefinition) -> Optional[SecretKeyUseCase]:
+    def __get_previous_use(
+        self, key_definition: SecretKeyDefinition
+    ) -> Optional[SecretKeyUseCase]:
         prev_use = key_definition.get_last_use_case()
         if prev_use is None and key_definition.is_stated():
             self._fetch_and_set_state_from_repo(key_definition)
             prev_use = key_definition.get_last_use_case()
         return prev_use
 
-
-    def _fetch_and_set_state_from_repo(self, key_definition: SecretKeyDefinition) -> None:
+    def _fetch_and_set_state_from_repo(
+        self, key_definition: SecretKeyDefinition
+    ) -> None:
         try:
             raw_state = self._crypto_tool.decrypt(
                 self._state_repo.read_state(key_definition.name)
             )
-            key_definition.set_last_use_case(
-                SecretKeyUseCase.get(raw_state[STATE])
-            )
+            key_definition.set_last_use_case(SecretKeyUseCase.get(raw_state[STATE]))
             if KEY in raw_state:
                 key_definition.set_previous_keys(raw_state[KEY])
         except InvalidUseCaseNameError as e:
@@ -272,8 +267,8 @@ class KeysManagementImpl(KeysManagement):
     def key_changed(
         self,
         key_name: str,
-        old_keys: SecretKeyPairValues,
-        new_keys: SecretKeyPairValues,
+        old_keys: StrOrBytesPair,
+        new_keys: StrOrBytesPair,
     ) -> None:
         try:
             if logger.isEnabledFor(logging.DEBUG):
@@ -301,12 +296,12 @@ class KeysManagementImpl(KeysManagement):
         key_name: str,
         callback_name: str,
         key_changed_context: KeyChangedContext,
-    ):
+    ) -> None:
         logger.error(
             ON_HALT_LOG_FORMAT.format(
                 key_name=key_name,
                 callback_name=callback_name,
-                error=key_changed_context[callback_name]['error'],
+                error=key_changed_context[callback_name]["error"],
             )
         )
         raise DoNothing()
@@ -316,12 +311,12 @@ class KeysManagementImpl(KeysManagement):
         key_name: str,
         callback_name: str,
         key_changed_context: KeyChangedContext,
-    ):
+    ) -> None:
         logger.error(
             ON_SKIP_LOG_FORMAT.format(
                 key_name=key_name,
                 callback_name=callback_name,
-                error=key_changed_context[callback_name]['error'],
+                error=key_changed_context[callback_name]["error"],
             )
         )
 
@@ -330,7 +325,7 @@ class KeysManagementImpl(KeysManagement):
         key_name: str,
         callback_name: str,
         key_changed_context: KeyChangedContext,
-    ):
+    ) -> None:
         pass
 
     @staticmethod
@@ -338,14 +333,14 @@ class KeysManagementImpl(KeysManagement):
         key_name: str,
         callback_name: str,
         key_changed_context: KeyChangedContext,
-    ):
+    ) -> None:
         raise KeyChangedError(key_name, key_changed_context)
 
     def _create_context(
         self,
         key_definition: SecretKeyDefinition,
-        old_keys: SecretKeyPairValues,
-        new_keys: SecretKeyPairValues,
+        old_keys: StrOrBytesPair,
+        new_keys: StrOrBytesPair,
     ) -> KeyChangedContext:
         return KeyChangedContext(
             key_definition,
@@ -367,9 +362,7 @@ class KeysManagementImpl(KeysManagement):
         callback_name = (
             callback_name
             if callback_name is not None
-            else DEFAULT_CALLBACK_NAME_FORMAT.format(
-                key_name, str(len(callbacks) + 1)
-            )
+            else DEFAULT_CALLBACK_NAME_FORMAT.format(key_name, str(len(callbacks) + 1))
         )
         callbacks[callback_name] = on_change_func
 
@@ -380,20 +373,16 @@ class KeysManagementImpl(KeysManagement):
 
     def save_state(self, key_name: str) -> None:
         self._validate_key_name(key_name)
-        last_use_case = self._keys_definitions[
-            key_name
-        ].get_last_use_case()
+        last_use_case = self._keys_definitions[key_name].get_last_use_case()
         raw_state = {STATE: last_use_case}
         if last_use_case == SecretKeyUseCase.ENCRYPTION:
             key = self.get_decrypt_key(key_name)
             if key is not None:
-                raw_state[KEY] = key
+                raw_state[KEY] = key  # type: ignore[assignment]
         self._write_state(key_name, raw_state)
 
     def _write_state(self, key_name: str, state: Dict) -> None:
-        self._state_repo.write_state(
-            key_name, self._crypto_tool.encrypt(state)
-        )
+        self._state_repo.write_state(key_name, self._crypto_tool.encrypt(state))
 
     def save_states(self) -> None:
         for key_name, key_definition in self._keys_definitions.items():

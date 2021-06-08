@@ -10,3 +10,8 @@ markers = [
     "unittest",
     "integrationtest",
 ]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 10
+lines_between_sections = 0

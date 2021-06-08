@@ -1,39 +1,38 @@
-from pytest import mark, raises, fixture
-from keys_management import (
-    KeysManagement,
-    KeysManagementImpl,
-    KeyIsNotDefinedError,
-    GetKeyError,
-    StateRepoInterface,
-    CryptoTool,
-    SecretKeyUseCase,
-    SecretKeyDefinitionInitError,
-    KeyChangedError,
-)
-from keys_management.consts import KEY, STATE
-from . import KeyDefForTest
+from __future__ import annotations
+from typing import Any, Dict, Optional, cast
+from unittest.mock import ANY, Mock
+from pytest import fixture, mark, raises
 from pytest_mock import MockerFixture
-from unittest.mock import ANY
+from keys_management import (CryptoTool, GetKeyError, KeyChangedError,
+    KeyIsNotDefinedError, KeysManagement, KeysManagementImpl,
+    SecretKeyDefinitionInitError, SecretKeyUseCase, StateRepoInterface,)
+from keys_management.consts import KEY, STATE
+from tests import KeyDefForTest
 
 
+# noinspection PyTypeChecker
 @mark.unittest
 class TestDefineKey:
     @staticmethod
     def define_key_test(
         empty_keys_management: KeysManagement,
         key_definition: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         key_name = key_definition.name
-        keys_store = key_definition.keys_store
+        keys_store = cast(Mock, key_definition.keys_store)
         # act
-        empty_keys_management.define_key(key_name, keys_store, key_definition.use_case, key_definition.is_stateless(),
-                                         key_definition.is_target_data_accessible(), key_definition.is_keep_in_cache())
-        # assert
-        defined_key: KeysManagement = (
-            empty_keys_management._keys_definitions[key_name]
+        empty_keys_management.define_key(
+            key_name,
+            keys_store,
+            key_definition.use_case,
+            key_definition.is_stateless(),
+            key_definition.is_target_data_accessible(),
+            key_definition.is_keep_in_cache(),
         )
+        # assert
+        defined_key: KeysManagement = empty_keys_management._keys_definitions[key_name]
         assert defined_key is not None
         assert defined_key.keys_store == keys_store
         assert (
@@ -48,9 +47,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             DE_stated_not_accessible,
@@ -62,9 +61,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         DE_stated_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             DE_stated_accessible,
@@ -76,9 +75,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         DE_stateless_not_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             DE_stateless_not_accessible,
@@ -90,9 +89,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         DE_stateless_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             DE_stateless_accessible,
@@ -104,9 +103,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         A_stated_not_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             A_stated_not_accessible,
@@ -118,9 +117,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         A_stated_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             A_stated_accessible,
@@ -132,9 +131,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         A_stateless_not_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             A_stateless_not_accessible,
@@ -146,9 +145,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         A_stateless_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             A_stateless_accessible,
@@ -160,9 +159,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         DE_not_cached_not_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             DE_not_cached_not_accessible,
@@ -174,9 +173,9 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         DE_not_cached_accessible: KeyDefForTest,
-        mocked_state_repo,
-        mocked_crypto_tool,
-    ):
+        mocked_state_repo: Mock,
+        mocked_crypto_tool: Mock,
+    ) -> None:
         self.define_key_test(
             empty_keys_management,
             DE_not_cached_accessible,
@@ -188,144 +187,206 @@ class TestDefineKey:
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(None, key_definition.keys_store, key_definition.use_case,
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                None,
+                key_definition.keys_store,
+                key_definition.use_case,
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_name__name_is_empty(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key('', key_definition.keys_store, key_definition.use_case,
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                "",
+                key_definition.keys_store,
+                key_definition.use_case,
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_name__name_is_not_str(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(True, key_definition.keys_store, key_definition.use_case,
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                True,
+                key_definition.keys_store,
+                key_definition.use_case,
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_keys_store__is_none(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(key_definition.name, None, key_definition.use_case,
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                key_definition.name,
+                None,
+                key_definition.use_case,
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_keys_store__is_not_callable(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(key_definition.name, "im_str", key_definition.use_case,
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                key_definition.name,
+                "im_str",
+                key_definition.use_case,
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_keys_store__callable_with_args(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(key_definition.name, lambda a: a, key_definition.use_case,
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                key_definition.name,
+                lambda a: a,
+                key_definition.use_case,
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_stateless(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.use_case,
-                                             'aaa', key_definition.is_target_data_accessible(),
-                                             key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                key_definition.name,
+                key_definition.keys_store,
+                key_definition.use_case,
+                "aaa",
+                key_definition.is_target_data_accessible(),
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_use_case_is_none(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, None,
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                key_definition.name,
+                key_definition.keys_store,
+                None,
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_use_case_is_not_use_case_type(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, 'ENCRYPTION',
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                key_definition.name,
+                key_definition.keys_store,
+                "ENCRYPTION",
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_target_data_accessible(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.use_case,
-                                             key_definition.is_stateless(), "aaa", key_definition.is_keep_in_cache())
+            empty_keys_management.define_key(
+                key_definition.name,
+                key_definition.keys_store,
+                key_definition.use_case,
+                key_definition.is_stateless(),
+                "aaa",
+                key_definition.is_keep_in_cache(),
+            )
 
     def test_define_key_with_invalid_keep_in_cache(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.use_case,
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             "aaa")
+            empty_keys_management.define_key(
+                key_definition.name,
+                key_definition.keys_store,
+                key_definition.use_case,
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                "aaa",
+            )
 
     def test_define_key_with_invalid_strategy(
         self,
         empty_keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
-    ):
+    ) -> None:
         key_definition = DE_stated_not_accessible
         # act
         with raises(SecretKeyDefinitionInitError):
-            empty_keys_management.define_key(key_definition.name, key_definition.keys_store, key_definition.use_case,
-                                             key_definition.is_stateless(), key_definition.is_target_data_accessible(),
-                                             True, True)
+            empty_keys_management.define_key(
+                key_definition.name,
+                key_definition.keys_store,
+                key_definition.use_case,
+                key_definition.is_stateless(),
+                key_definition.is_target_data_accessible(),
+                True,
+                True,
+            )
 
 
 @mark.unittest
@@ -335,11 +396,9 @@ class TestGetKey:
         keys_management: KeysManagement,
         not_defined_key_name: str,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         with raises(GetKeyError):
-            keys_management.get_key(
-                not_defined_key_name, SecretKeyUseCase.ENCRYPTION
-            )
+            keys_management.get_key(not_defined_key_name, SecretKeyUseCase.ENCRYPTION)
 
         mocked_state_repo.read_state.assert_not_called()
 
@@ -348,7 +407,7 @@ class TestGetKey:
         keys_management: KeysManagement,
         not_defined_key_name: str,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         with raises(GetKeyError):
             keys_management.get_key(not_defined_key_name, "ofek")
 
@@ -359,45 +418,40 @@ class TestGetKey:
         keys_management: KeysManagement,
         stated_key_def: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
-        def read_state(_key_name):
+    ) -> None:
+        def read_state(_key_name: str) -> Optional[Dict[str, str]]:
             if _key_name == stated_key_def.name:
                 return {
                     STATE: "invalid_name",
-                    KEY: stated_key_def.keys['decrypt'],
+                    KEY: stated_key_def.keys["decrypt"],
                 }
+            return None
 
         mocked_state_repo.read_state.side_effect = read_state
         with raises(GetKeyError):
             keys_management.get_decrypt_key(stated_key_def.name)
-        mocked_state_repo.read_state.assert_called_once_with(
-            stated_key_def.name
-        )
+        mocked_state_repo.read_state.assert_called_once_with(stated_key_def.name)
 
     def test_stated_key_key_from_state(
         self,
         keys_management: KeysManagement,
         stated_key_def: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
-        key_from_state = 'key_from_state'
+    ) -> None:
+        key_from_state = "key_from_state"
 
-        def read_state(_key_name):
+        def read_state(_key_name: str) -> Optional[Dict[str, str]]:
             if _key_name == stated_key_def.name:
                 return {
                     STATE: SecretKeyUseCase.DECRYPTION.name,
                     KEY: key_from_state,
                 }
+            return None
 
         mocked_state_repo.read_state.side_effect = read_state
 
-        assert (
-            keys_management.get_decrypt_key(stated_key_def.name)
-            == key_from_state
-        )
-        mocked_state_repo.read_state.assert_called_once_with(
-            stated_key_def.name
-        )
+        assert keys_management.get_decrypt_key(stated_key_def.name) == key_from_state
+        mocked_state_repo.read_state.assert_called_once_with(stated_key_def.name)
         stated_key_def.keys_store.assert_not_called()
 
     def test_stated_key_when_key_not_stored(
@@ -405,22 +459,21 @@ class TestGetKey:
         keys_management: KeysManagement,
         stated_key_def: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
-        def read_state(_key_name):
+    ) -> None:
+        def read_state(_key_name: str) -> Optional[Dict[str, str]]:
             if _key_name == stated_key_def.name:
                 return {
                     STATE: SecretKeyUseCase.DECRYPTION.name,
                 }
+            return None
 
         mocked_state_repo.read_state.side_effect = read_state
 
         assert (
             keys_management.get_decrypt_key(stated_key_def.name)
-            == stated_key_def.keys['decrypt']
+            == stated_key_def.keys["decrypt"]
         )
-        mocked_state_repo.read_state.assert_called_once_with(
-            stated_key_def.name
-        )
+        mocked_state_repo.read_state.assert_called_once_with(stated_key_def.name)
         stated_key_def.keys_store.assert_called_once()
 
     def test_stated__state_ignore_on_encrypt_purpose(
@@ -428,10 +481,10 @@ class TestGetKey:
         keys_management: KeysManagement,
         stated_key_def: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         assert (
             keys_management.get_encrypt_key(stated_key_def.name)
-            == stated_key_def.keys['encrypt']
+            == stated_key_def.keys["encrypt"]
         )
 
         mocked_state_repo.read_state.assert_not_called()
@@ -443,12 +496,12 @@ class TestGetKey:
         keys_management: KeysManagement,
         stated_key_def: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         keys_management.get_encrypt_key(stated_key_def.name)
         mocked_state_repo.reset_mock()
         assert (
             keys_management.get_key(stated_key_def.name)
-            == stated_key_def.keys['decrypt']
+            == stated_key_def.keys["decrypt"]
         )
         mocked_state_repo.read_state.assert_not_called()
 
@@ -457,12 +510,12 @@ class TestGetKey:
         keys_management: KeysManagement,
         stated_key_def: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         keys_management.get_encrypt_key(stated_key_def.name)
         mocked_state_repo.reset_mock()
         assert (
             keys_management.get_key(stated_key_def.name)
-            == stated_key_def.keys['decrypt']
+            == stated_key_def.keys["decrypt"]
         )
         mocked_state_repo.read_state.assert_not_called()
 
@@ -471,10 +524,10 @@ class TestGetKey:
         keys_management: KeysManagement,
         stateless_key_def: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         assert (
             keys_management.get_key(stateless_key_def.name)
-            == stateless_key_def.keys['encrypt']
+            == stateless_key_def.keys["encrypt"]
         )
         mocked_state_repo.read_state.assert_not_called()
 
@@ -483,45 +536,43 @@ class TestGetKey:
         keys_management: KeysManagement,
         DE_stated_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
-        key_from_state = 'key_from_state'
+    ) -> None:
+        key_from_state = "key_from_state"
 
-        def read_state(_key_name):
+        def read_state(_key_name: str) -> Optional[Dict[str, str]]:
             if _key_name == DE_stated_accessible.name:
                 return {
                     STATE: SecretKeyUseCase.DECRYPTION.name,
                     KEY: key_from_state,
                 }
+            return None
 
         mocked_state_repo.read_state.side_effect = read_state
 
         assert (
             keys_management.get_key(DE_stated_accessible.name)
-            == DE_stated_accessible.keys['encrypt']
+            == DE_stated_accessible.keys["encrypt"]
         )
-        mocked_state_repo.read_state.assert_called_once_with(
-            DE_stated_accessible.name
-        )
+        mocked_state_repo.read_state.assert_called_once_with(DE_stated_accessible.name)
 
     def test_determine_purpose_stated_key_when_state_is_encryption(
         self,
         keys_management: KeysManagement,
         DE_stated_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
-        def read_state(_key_name):
+    ) -> None:
+        def read_state(_key_name: str) -> Optional[Dict[str, str]]:
             if _key_name == DE_stated_accessible.name:
                 return {STATE: SecretKeyUseCase.ENCRYPTION.name}
+            return None
 
         mocked_state_repo.read_state.side_effect = read_state
 
         assert (
             keys_management.get_key(DE_stated_accessible.name)
-            == DE_stated_accessible.keys['decrypt']
+            == DE_stated_accessible.keys["decrypt"]
         )
-        mocked_state_repo.read_state.assert_called_once_with(
-            DE_stated_accessible.name
-        )
+        mocked_state_repo.read_state.assert_called_once_with(DE_stated_accessible.name)
 
 
 @mark.unittest
@@ -531,38 +582,21 @@ class TestGetKeyEEDDE:
         keys_management: KeysManagement,
         key_definition: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         key_name = key_definition.name
         expected_encrypt_key, expected_decrypt_key = (
-            key_definition.keys['encrypt'],
-            key_definition.keys['decrypt'],
+            key_definition.keys["encrypt"],
+            key_definition.keys["decrypt"],
         )
 
-        assert (
-            keys_management.get_encrypt_key(key_name)
-            == expected_encrypt_key
-        )
-        assert (
-            keys_management.get_encrypt_key(key_name)
-            == expected_encrypt_key
-        )
-        assert (
-            keys_management.get_decrypt_key(key_name)
-            == expected_decrypt_key
-        )
-        assert (
-            keys_management.get_decrypt_key(key_name)
-            == expected_decrypt_key
-        )
-        assert (
-            keys_management.get_encrypt_key(key_name)
-            == expected_encrypt_key
-        )
+        assert keys_management.get_encrypt_key(key_name) == expected_encrypt_key
+        assert keys_management.get_encrypt_key(key_name) == expected_encrypt_key
+        assert keys_management.get_decrypt_key(key_name) == expected_decrypt_key
+        assert keys_management.get_decrypt_key(key_name) == expected_decrypt_key
+        assert keys_management.get_encrypt_key(key_name) == expected_encrypt_key
 
         mocked_state_repo.read_state.assert_not_called()
-        expected_calls_count = (
-            3 if key_definition.is_keep_in_cache() else 4
-        )
+        expected_calls_count = 3 if key_definition.is_keep_in_cache() else 4
         assert key_definition.keys_store.call_count == expected_calls_count
 
     def test_DE_stated_not_accessible(
@@ -570,7 +604,7 @@ class TestGetKeyEEDDE:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_EEDDE_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -580,7 +614,7 @@ class TestGetKeyEEDDE:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_EEDDE_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -590,7 +624,7 @@ class TestGetKeyEEDDE:
         keys_management: KeysManagement,
         DE_stateless_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_EEDDE_scenario_test(
             keys_management, DE_stateless_not_accessible, mocked_state_repo
         )
@@ -600,7 +634,7 @@ class TestGetKeyEEDDE:
         keys_management: KeysManagement,
         DE_stateless_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_EEDDE_scenario_test(
             keys_management, DE_stateless_accessible, mocked_state_repo
         )
@@ -610,7 +644,7 @@ class TestGetKeyEEDDE:
         keys_management: KeysManagement,
         DE_not_cached_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_EEDDE_scenario_test(
             keys_management,
             DE_not_cached_not_accessible,
@@ -622,12 +656,13 @@ class TestGetKeyEEDDE:
         keys_management: KeysManagement,
         DE_not_cached_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_EEDDE_scenario_test(
             keys_management, DE_not_cached_accessible, mocked_state_repo
         )
 
 
+# noinspection PyUnresolvedReferences
 @mark.unittest
 class TestGetKeyDDEED:
     @staticmethod
@@ -635,47 +670,31 @@ class TestGetKeyDDEED:
         keys_management: KeysManagement,
         key_definition: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         key_name = key_definition.name
         expected_encrypt_key, expected_decrypt_key = (
-            key_definition.keys['encrypt'],
-            key_definition.keys['decrypt'],
+            key_definition.keys["encrypt"],
+            key_definition.keys["decrypt"],
         )
 
-        def read_state(_key_name):
+        def read_state(_key_name: str) -> Optional[Dict[str, str]]:
             if _key_name == key_definition.name:
                 return {
                     STATE: SecretKeyUseCase.DECRYPTION.name,
-                    KEY: key_definition.keys['decrypt'],
+                    KEY: key_definition.keys["decrypt"],
                 }
+            return None
 
         mocked_state_repo.read_state.side_effect = read_state
 
-        assert (
-            keys_management.get_decrypt_key(key_name)
-            == expected_decrypt_key
-        )
-        assert (
-            keys_management.get_decrypt_key(key_name)
-            == expected_decrypt_key
-        )
-        assert (
-            keys_management.get_encrypt_key(key_name)
-            == expected_encrypt_key
-        )
-        assert (
-            keys_management.get_encrypt_key(key_name)
-            == expected_encrypt_key
-        )
-        assert (
-            keys_management.get_decrypt_key(key_name)
-            == expected_decrypt_key
-        )
+        assert keys_management.get_decrypt_key(key_name) == expected_decrypt_key
+        assert keys_management.get_decrypt_key(key_name) == expected_decrypt_key
+        assert keys_management.get_encrypt_key(key_name) == expected_encrypt_key
+        assert keys_management.get_encrypt_key(key_name) == expected_encrypt_key
+        assert keys_management.get_decrypt_key(key_name) == expected_decrypt_key
 
         if key_definition.is_stated():
-            mocked_state_repo.read_state.assert_called_once_with(
-                key_definition.name
-            )
+            mocked_state_repo.read_state.assert_called_once_with(key_definition.name)
         else:
             mocked_state_repo.read_state.assert_not_called()
 
@@ -692,7 +711,7 @@ class TestGetKeyDDEED:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DDEED_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -702,7 +721,7 @@ class TestGetKeyDDEED:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DDEED_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -712,7 +731,7 @@ class TestGetKeyDDEED:
         keys_management: KeysManagement,
         DE_stateless_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DDEED_scenario_test(
             keys_management, DE_stateless_not_accessible, mocked_state_repo
         )
@@ -722,7 +741,7 @@ class TestGetKeyDDEED:
         keys_management: KeysManagement,
         DE_stateless_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DDEED_scenario_test(
             keys_management, DE_stateless_accessible, mocked_state_repo
         )
@@ -732,7 +751,7 @@ class TestGetKeyDDEED:
         keys_management: KeysManagement,
         DE_not_cached_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DDEED_scenario_test(
             keys_management,
             DE_not_cached_not_accessible,
@@ -744,7 +763,7 @@ class TestGetKeyDDEED:
         keys_management: KeysManagement,
         DE_not_cached_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DDEED_scenario_test(
             keys_management, DE_not_cached_accessible, mocked_state_repo
         )
@@ -757,26 +776,20 @@ class TestGetKeyECE:
         keys_management: KeysManagement,
         key_definition: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         key_name = key_definition.name
         expected_encrypt_key, expected_decrypt_key = (
-            key_definition.keys['encrypt'],
-            key_definition.keys['decrypt'],
+            key_definition.keys["encrypt"],
+            key_definition.keys["decrypt"],
         )
         expected_next_encrypt_key = "new_" + expected_encrypt_key
         expected_next_decrypt_key = "new_" + expected_decrypt_key
 
-        assert (
-            keys_management.get_encrypt_key(key_name)
-            == expected_encrypt_key
-        )
+        assert keys_management.get_encrypt_key(key_name) == expected_encrypt_key
         key_definition.set_next_as_keys(
             (expected_next_encrypt_key, expected_next_decrypt_key)
         )
-        assert (
-            keys_management.get_encrypt_key(key_name)
-            == expected_next_encrypt_key
-        )
+        assert keys_management.get_encrypt_key(key_name) == expected_next_encrypt_key
 
         mocked_state_repo.read_state.assert_not_called()
 
@@ -785,7 +798,7 @@ class TestGetKeyECE:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECE_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -795,7 +808,7 @@ class TestGetKeyECE:
         keys_management: KeysManagement,
         DE_stated_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECE_scenario_test(
             keys_management, DE_stated_accessible, mocked_state_repo
         )
@@ -805,7 +818,7 @@ class TestGetKeyECE:
         keys_management: KeysManagement,
         DE_stateless_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECE_scenario_test(
             keys_management, DE_stateless_not_accessible, mocked_state_repo
         )
@@ -815,7 +828,7 @@ class TestGetKeyECE:
         keys_management: KeysManagement,
         DE_stateless_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECE_scenario_test(
             keys_management, DE_stateless_accessible, mocked_state_repo
         )
@@ -825,7 +838,7 @@ class TestGetKeyECE:
         keys_management: KeysManagement,
         DE_not_cached_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECE_scenario_test(
             keys_management,
             DE_not_cached_not_accessible,
@@ -837,7 +850,7 @@ class TestGetKeyECE:
         keys_management: KeysManagement,
         DE_not_cached_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECE_scenario_test(
             keys_management, DE_not_cached_accessible, mocked_state_repo
         )
@@ -850,19 +863,16 @@ class TestGetKeyECD:
         keys_management: KeysManagement,
         key_definition: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         key_name = key_definition.name
         expected_encrypt_key, expected_decrypt_key = (
-            key_definition.keys['encrypt'],
-            key_definition.keys['decrypt'],
+            key_definition.keys["encrypt"],
+            key_definition.keys["decrypt"],
         )
         expected_next_encrypt_key = "new_" + expected_encrypt_key
         expected_next_decrypt_key = "new_" + expected_decrypt_key
 
-        assert (
-            keys_management.get_encrypt_key(key_name)
-            == expected_encrypt_key
-        )
+        assert keys_management.get_encrypt_key(key_name) == expected_encrypt_key
         key_definition.set_next_as_keys(
             (expected_next_encrypt_key, expected_next_decrypt_key)
         )
@@ -877,7 +887,7 @@ class TestGetKeyECD:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECD_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -887,7 +897,7 @@ class TestGetKeyECD:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECD_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -897,7 +907,7 @@ class TestGetKeyECD:
         keys_management: KeysManagement,
         DE_stateless_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECD_scenario_test(
             keys_management, DE_stateless_not_accessible, mocked_state_repo
         )
@@ -907,7 +917,7 @@ class TestGetKeyECD:
         keys_management: KeysManagement,
         DE_stateless_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECD_scenario_test(
             keys_management, DE_stateless_accessible, mocked_state_repo
         )
@@ -917,7 +927,7 @@ class TestGetKeyECD:
         keys_management: KeysManagement,
         DE_not_cached_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECD_scenario_test(
             keys_management,
             DE_not_cached_not_accessible,
@@ -929,7 +939,7 @@ class TestGetKeyECD:
         keys_management: KeysManagement,
         DE_not_cached_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ECD_scenario_test(
             keys_management, DE_not_cached_accessible, mocked_state_repo
         )
@@ -942,40 +952,33 @@ class TestGetKeyDCE:
         keys_management: KeysManagement,
         key_definition: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         key_name = key_definition.name
         expected_encrypt_key, expected_decrypt_key = (
-            key_definition.keys['encrypt'],
-            key_definition.keys['decrypt'],
+            key_definition.keys["encrypt"],
+            key_definition.keys["decrypt"],
         )
         expected_next_encrypt_key = "new_" + expected_encrypt_key
         expected_next_decrypt_key = "new_" + expected_decrypt_key
 
-        def read_state(_key_name):
+        def read_state(_key_name: str) -> Optional[Dict[str, str]]:
             if _key_name == key_definition.name:
                 return {
                     STATE: SecretKeyUseCase.DECRYPTION.name,
-                    KEY: key_definition.keys['decrypt'],
+                    KEY: key_definition.keys["decrypt"],
                 }
+            return None
 
         mocked_state_repo.read_state.side_effect = read_state
 
-        assert (
-            keys_management.get_decrypt_key(key_name)
-            == expected_decrypt_key
-        )
+        assert keys_management.get_decrypt_key(key_name) == expected_decrypt_key
         key_definition.set_next_as_keys(
             (expected_next_encrypt_key, expected_next_decrypt_key)
         )
-        assert (
-            keys_management.get_encrypt_key(key_name)
-            == expected_next_encrypt_key
-        )
+        assert keys_management.get_encrypt_key(key_name) == expected_next_encrypt_key
 
         if key_definition.is_stated():
-            mocked_state_repo.read_state.assert_called_once_with(
-                key_definition.name
-            )
+            mocked_state_repo.read_state.assert_called_once_with(key_definition.name)
         else:
             mocked_state_repo.read_state.assert_not_called()
 
@@ -984,7 +987,7 @@ class TestGetKeyDCE:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCE_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -994,7 +997,7 @@ class TestGetKeyDCE:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCE_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -1004,7 +1007,7 @@ class TestGetKeyDCE:
         keys_management: KeysManagement,
         DE_stateless_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCE_scenario_test(
             keys_management, DE_stateless_not_accessible, mocked_state_repo
         )
@@ -1014,7 +1017,7 @@ class TestGetKeyDCE:
         keys_management: KeysManagement,
         DE_stateless_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCE_scenario_test(
             keys_management, DE_stateless_accessible, mocked_state_repo
         )
@@ -1024,7 +1027,7 @@ class TestGetKeyDCE:
         keys_management: KeysManagement,
         DE_not_cached_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCE_scenario_test(
             keys_management,
             DE_not_cached_not_accessible,
@@ -1036,7 +1039,7 @@ class TestGetKeyDCE:
         keys_management: KeysManagement,
         DE_not_cached_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCE_scenario_test(
             keys_management, DE_not_cached_accessible, mocked_state_repo
         )
@@ -1046,6 +1049,7 @@ class TestGetKeyDCE:
 # repository cache usage
 # local cache usage according to each use-case
 
+
 @mark.unittest
 class TestGetKeyDCD:
     @staticmethod
@@ -1053,46 +1057,38 @@ class TestGetKeyDCD:
         keys_management: KeysManagement,
         key_definition: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         key_name = key_definition.name
         expected_encrypt_key, expected_decrypt_key = (
-            key_definition.keys['encrypt'],
-            key_definition.keys['decrypt'],
+            key_definition.keys["encrypt"],
+            key_definition.keys["decrypt"],
         )
         expected_next_encrypt_key = "new_" + expected_encrypt_key
         expected_next_decrypt_key = "new_" + expected_decrypt_key
 
-        def read_state(_key_name):
+        def read_state(_key_name: str) -> Optional[Dict[str, str]]:
             if _key_name == key_definition.name:
                 return {
                     STATE: SecretKeyUseCase.DECRYPTION.name,
-                    KEY: key_definition.keys['decrypt'],
+                    KEY: key_definition.keys["decrypt"],
                 }
+            return None
 
         mocked_state_repo.read_state.side_effect = read_state
 
-        assert (
-            keys_management.get_decrypt_key(key_name)
-            == expected_decrypt_key
-        )
+        assert keys_management.get_decrypt_key(key_name) == expected_decrypt_key
         key_definition.set_next_as_keys(
             (expected_next_encrypt_key, expected_next_decrypt_key)
         )
         if key_definition.is_keep_in_cache():
-            assert (
-                keys_management.get_decrypt_key(key_name)
-                == expected_decrypt_key
-            )
+            assert keys_management.get_decrypt_key(key_name) == expected_decrypt_key
         else:
             assert (
-                keys_management.get_decrypt_key(key_name)
-                == expected_next_decrypt_key
+                keys_management.get_decrypt_key(key_name) == expected_next_decrypt_key
             )
 
         if key_definition.is_stated():
-            mocked_state_repo.read_state.assert_called_once_with(
-                key_definition.name
-            )
+            mocked_state_repo.read_state.assert_called_once_with(key_definition.name)
         else:
             mocked_state_repo.read_state.assert_not_called()
 
@@ -1101,7 +1097,7 @@ class TestGetKeyDCD:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCD_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -1111,7 +1107,7 @@ class TestGetKeyDCD:
         keys_management: KeysManagement,
         DE_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCD_scenario_test(
             keys_management, DE_stated_not_accessible, mocked_state_repo
         )
@@ -1121,7 +1117,7 @@ class TestGetKeyDCD:
         keys_management: KeysManagement,
         DE_stateless_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCD_scenario_test(
             keys_management, DE_stateless_not_accessible, mocked_state_repo
         )
@@ -1131,7 +1127,7 @@ class TestGetKeyDCD:
         keys_management: KeysManagement,
         DE_stateless_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCD_scenario_test(
             keys_management, DE_stateless_accessible, mocked_state_repo
         )
@@ -1141,7 +1137,7 @@ class TestGetKeyDCD:
         keys_management: KeysManagement,
         DE_not_cached_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCD_scenario_test(
             keys_management,
             DE_not_cached_not_accessible,
@@ -1153,7 +1149,7 @@ class TestGetKeyDCD:
         keys_management: KeysManagement,
         DE_not_cached_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_DCD_scenario_test(
             keys_management, DE_not_cached_accessible, mocked_state_repo
         )
@@ -1166,20 +1162,16 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         key_definition: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         key_name = key_definition.name
         expected_key = key_definition.keys
 
         assert (
-            keys_management.get_key(
-                key_name, SecretKeyUseCase.AUTHENTICATION
-            )
+            keys_management.get_key(key_name, SecretKeyUseCase.AUTHENTICATION)
             == expected_key
         )
         assert (
-            keys_management.get_key(
-                key_name, SecretKeyUseCase.AUTHENTICATION
-            )
+            keys_management.get_key(key_name, SecretKeyUseCase.AUTHENTICATION)
             == expected_key
         )
         mocked_state_repo.read_state.assert_not_called()
@@ -1189,22 +1181,18 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         key_definition: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         key_name = key_definition.name
         expected_key = key_definition.keys
         expected_next_key = "new_" + expected_key
 
         assert (
-            keys_management.get_key(
-                key_name, SecretKeyUseCase.AUTHENTICATION
-            )
+            keys_management.get_key(key_name, SecretKeyUseCase.AUTHENTICATION)
             == expected_key
         )
         key_definition.set_next_as_keys(expected_next_key)
         assert (
-            keys_management.get_key(
-                key_name, SecretKeyUseCase.AUTHENTICATION
-            )
+            keys_management.get_key(key_name, SecretKeyUseCase.AUTHENTICATION)
             == expected_next_key
         )
         mocked_state_repo.read_state.assert_not_called()
@@ -1214,7 +1202,7 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         A_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_AA_scenario_test(
             keys_management, A_stated_not_accessible, mocked_state_repo
         )
@@ -1224,7 +1212,7 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         A_stated_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_AA_scenario_test(
             keys_management, A_stated_accessible, mocked_state_repo
         )
@@ -1234,7 +1222,7 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         A_stateless_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_AA_scenario_test(
             keys_management, A_stateless_not_accessible, mocked_state_repo
         )
@@ -1244,7 +1232,7 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         A_stateless_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_AA_scenario_test(
             keys_management, A_stateless_accessible, mocked_state_repo
         )
@@ -1254,7 +1242,7 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         A_stated_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ACA_scenario_test(
             keys_management, A_stated_not_accessible, mocked_state_repo
         )
@@ -1264,7 +1252,7 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         A_stated_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ACA_scenario_test(
             keys_management, A_stated_accessible, mocked_state_repo
         )
@@ -1274,7 +1262,7 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         A_stateless_not_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ACA_scenario_test(
             keys_management, A_stateless_not_accessible, mocked_state_repo
         )
@@ -1284,7 +1272,7 @@ class TestGetKeyA:
         keys_management: KeysManagement,
         A_stateless_accessible: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
-    ):
+    ) -> None:
         self.get_key_ACA_scenario_test(
             keys_management, A_stateless_accessible, mocked_state_repo
         )
@@ -1294,31 +1282,23 @@ class TestGetKeyA:
 class TestKeyManagementImpl:
     def test_on_change_invalid_key(
         self, keys_management: KeysManagement, not_defined_key_name: str
-    ):
+    ) -> None:
         with raises(KeyIsNotDefinedError):
-            keys_management.register_on_change(
-                not_defined_key_name, lambda n, o: n
-            )
+            keys_management.register_on_change(not_defined_key_name, lambda n, o: n)
 
     def test_on_change__with_key_changed(
         self,
         keys_management: KeysManagement,
         stated_key_def: KeyDefForTest,
         mocker: MockerFixture,
-    ):
+    ) -> None:
         first_on_change_mock = mocker.MagicMock()
         second_on_change_mock = mocker.MagicMock()
         third_on_change_mock = mocker.MagicMock()
 
-        keys_management.register_on_change(
-            stated_key_def.name, first_on_change_mock
-        )
-        keys_management.register_on_change(
-            stated_key_def.name, second_on_change_mock
-        )
-        keys_management.register_on_change(
-            stated_key_def.name, third_on_change_mock
-        )
+        keys_management.register_on_change(stated_key_def.name, first_on_change_mock)
+        keys_management.register_on_change(stated_key_def.name, second_on_change_mock)
+        keys_management.register_on_change(stated_key_def.name, third_on_change_mock)
 
         old_key = "old_key"
         new_key = "new_key"
@@ -1326,9 +1306,7 @@ class TestKeyManagementImpl:
         keys_management.key_changed(stated_key_def.name, old_key, new_key)
 
         first_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
-        second_on_change_mock.assert_called_once_with(
-            old_key, new_key, ANY
-        )
+        second_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
         third_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
 
     def test_key_changed__halt_strategy(
@@ -1336,9 +1314,9 @@ class TestKeyManagementImpl:
         keys_management: KeysManagement,
         halt_error_strategy_key_def: KeyDefForTest,
         mocker: MockerFixture,
-    ):
-        def raise_error(a, b, c):
-            raise RuntimeError('error')
+    ) -> None:
+        def raise_error(a: Any, b: Any, c: Any) -> None:
+            raise RuntimeError("error")
 
         first_on_change_mock = mocker.MagicMock()
         second_on_change_mock = mocker.MagicMock(side_effect=raise_error)
@@ -1357,14 +1335,10 @@ class TestKeyManagementImpl:
         old_key = "old_key"
         new_key = "new_key"
 
-        keys_management.key_changed(
-            halt_error_strategy_key_def.name, old_key, new_key
-        )
+        keys_management.key_changed(halt_error_strategy_key_def.name, old_key, new_key)
 
         first_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
-        second_on_change_mock.assert_called_once_with(
-            old_key, new_key, ANY
-        )
+        second_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
         third_on_change_mock.assert_not_called()
 
     def test_key_changed__skip_strategy(
@@ -1372,9 +1346,9 @@ class TestKeyManagementImpl:
         keys_management: KeysManagement,
         skip_error_strategy_key_def: KeyDefForTest,
         mocker: MockerFixture,
-    ):
-        def raise_error(a, b, c):
-            raise RuntimeError('error')
+    ) -> None:
+        def raise_error(a: Any, b: Any, c: Any) -> None:
+            raise RuntimeError("error")
 
         first_on_change_mock = mocker.MagicMock()
         second_on_change_mock = mocker.MagicMock(side_effect=raise_error)
@@ -1393,14 +1367,10 @@ class TestKeyManagementImpl:
         old_key = "old_key"
         new_key = "new_key"
 
-        keys_management.key_changed(
-            skip_error_strategy_key_def.name, old_key, new_key
-        )
+        keys_management.key_changed(skip_error_strategy_key_def.name, old_key, new_key)
 
         first_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
-        second_on_change_mock.assert_called_once_with(
-            old_key, new_key, ANY
-        )
+        second_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
         third_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
 
     def test_key_changed__skip_and_raise_strategy(
@@ -1408,9 +1378,9 @@ class TestKeyManagementImpl:
         keys_management: KeysManagement,
         skip_raise_error_strategy_key_def: KeyDefForTest,
         mocker: MockerFixture,
-    ):
-        def raise_error(a, b, c):
-            raise RuntimeError('error')
+    ) -> None:
+        def raise_error(a: Any, b: Any, c: Any) -> None:
+            raise RuntimeError("error")
 
         first_on_change_mock = mocker.MagicMock()
         second_on_change_mock = mocker.MagicMock(side_effect=raise_error)
@@ -1435,9 +1405,7 @@ class TestKeyManagementImpl:
             )
 
         first_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
-        second_on_change_mock.assert_called_once_with(
-            old_key, new_key, ANY
-        )
+        second_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
         third_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
 
     def test_key_changed__raise_strategy(
@@ -1445,9 +1413,9 @@ class TestKeyManagementImpl:
         keys_management: KeysManagement,
         raise_error_strategy_key_def: KeyDefForTest,
         mocker: MockerFixture,
-    ):
-        def raise_error(a, b, c):
-            raise RuntimeError('error')
+    ) -> None:
+        def raise_error(a: Any, b: Any, c: Any) -> None:
+            raise RuntimeError("error")
 
         first_on_change_mock = mocker.MagicMock()
         second_on_change_mock = mocker.MagicMock(side_effect=raise_error)
@@ -1472,9 +1440,7 @@ class TestKeyManagementImpl:
             )
 
         first_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
-        second_on_change_mock.assert_called_once_with(
-            old_key, new_key, ANY
-        )
+        second_on_change_mock.assert_called_once_with(old_key, new_key, ANY)
         third_on_change_mock.assert_not_called()
 
     def test_save_states_when_last_stated_key_use_is_encryption(
@@ -1484,12 +1450,18 @@ class TestKeyManagementImpl:
         stateless_key_def: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
         mocked_crypto_tool: CryptoTool,
-    ):
+    ) -> None:
 
         for key_def in [stateless_key_def, stated_key_def]:
-            empty_keys_management.define_key(key_def.name, key_def.keys_store, key_def.use_case, key_def.is_stateless(),
-                                             key_def.is_target_data_accessible(), key_def.is_keep_in_cache(),
-                                             key_def.on_key_changed_callback_error_strategy)
+            empty_keys_management.define_key(
+                key_def.name,
+                key_def.keys_store,
+                key_def.use_case,
+                key_def.is_stateless(),
+                key_def.is_target_data_accessible(),
+                key_def.is_keep_in_cache(),
+                key_def.on_key_changed_callback_error_strategy,
+            )
 
         # arrange
         mocked_crypto_tool.decrypt.side_effect = lambda data: data
@@ -1500,7 +1472,7 @@ class TestKeyManagementImpl:
 
         encryption_state = {
             STATE: SecretKeyUseCase.ENCRYPTION,
-            KEY: stated_key_def.keys['decrypt'],
+            KEY: stated_key_def.keys["decrypt"],
         }
 
         # act
@@ -1510,9 +1482,7 @@ class TestKeyManagementImpl:
         mocked_state_repo.write_state.assert_called_once_with(
             stated_key_def.name, encryption_state
         )
-        mocked_crypto_tool.encrypt.assert_called_once_with(
-            encryption_state
-        )
+        mocked_crypto_tool.encrypt.assert_called_once_with(encryption_state)
 
     def test_save_states_when_last_stated_key_use_is_decryption(
         self,
@@ -1521,20 +1491,27 @@ class TestKeyManagementImpl:
         stateless_key_def: KeyDefForTest,
         mocked_state_repo: StateRepoInterface,
         mocked_crypto_tool: CryptoTool,
-    ):
+    ) -> None:
 
         for key_def in [stateless_key_def, stated_key_def]:
-            empty_keys_management.define_key(key_def.name, key_def.keys_store, key_def.use_case, key_def.is_stateless(),
-                                             key_def.is_target_data_accessible(), key_def.is_keep_in_cache(),
-                                             key_def.on_key_changed_callback_error_strategy)
+            empty_keys_management.define_key(
+                key_def.name,
+                key_def.keys_store,
+                key_def.use_case,
+                key_def.is_stateless(),
+                key_def.is_target_data_accessible(),
+                key_def.is_keep_in_cache(),
+                key_def.on_key_changed_callback_error_strategy,
+            )
 
         # arrange
         mocked_crypto_tool.decrypt.side_effect = lambda data: data
         mocked_crypto_tool.encrypt.side_effect = lambda data: data
 
-        def read_state(key_name):
+        def read_state(key_name: str) -> Optional[Dict[str, str]]:
             if key_name == stated_key_def.name:
                 return {STATE: SecretKeyUseCase.ENCRYPTION.name}
+            return None
 
         mocked_state_repo.read_state.side_effect = read_state
 
@@ -1550,9 +1527,7 @@ class TestKeyManagementImpl:
         mocked_state_repo.write_state.assert_called_once_with(
             stated_key_def.name, decryption_state
         )
-        mocked_crypto_tool.encrypt.assert_called_once_with(
-            decryption_state
-        )
+        mocked_crypto_tool.encrypt.assert_called_once_with(decryption_state)
 
 
 @fixture

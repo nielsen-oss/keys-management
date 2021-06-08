@@ -1,0 +1,6 @@
+-r test.in
+
+build
+twine
+bump2version
+Sphinx

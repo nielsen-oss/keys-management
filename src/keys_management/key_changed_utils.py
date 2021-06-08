@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import Callable, Union, Dict, TYPE_CHECKING
-from enum import Enum
 import logging
+from enum import Enum
+from typing import TYPE_CHECKING, Any, Callable, Dict
+from .errors import KeyChangedError, OnKeyChangedCallbackErrorStrategy
 from .on_change_key_definition import OnChangeKeyDefinition
-from .errors import OnKeyChangedCallbackErrorStrategy, KeyChangedError
 
 logger = logging.getLogger(__name__)
 
@@ -16,10 +16,11 @@ class CallbackStatus(Enum):
 
 
 if TYPE_CHECKING:
-    from .secret_key import SecretKeyPairValues
+    from .secret_key import StrOrBytesPair
     from .secret_key.key_definition import SecretKeyDefinition
-    OldKeys = SecretKeyPairValues
-    newKeys = SecretKeyPairValues
+
+    OldKeys = StrOrBytesPair
+    newKeys = StrOrBytesPair
     KeyChangedCallback = Callable[
         [
             OldKeys,
@@ -28,44 +29,38 @@ if TYPE_CHECKING:
         ],
         None,
     ]
-    Callbacks = Dict[
-        str, Dict[str, Union[str, KeyChangedCallback, CallbackStatus]]
-    ]
+    Callbacks = Dict[str, Dict[str, Any]]
 
 
 class KeyChangedContext:
     _key_name: str
     _on_change_key_definition: OnChangeKeyDefinition
     _on_key_changed_callback_error_strategy: OnKeyChangedCallbackErrorStrategy
-    _strategy_function: callable
+    _strategy_function: Callable[..., None]
     _callbacks: Callbacks
     _has_error: bool
-    _old_keys: SecretKeyPairValues
-    _new_keys: SecretKeyPairValues
+    _old_keys: StrOrBytesPair
+    _new_keys: StrOrBytesPair
 
     def __init__(
         self,
         key_definition: SecretKeyDefinition,
-        on_error_strategy: callable,
-        old_keys: SecretKeyPairValues,
-        new_keys: SecretKeyPairValues,
+        on_error_strategy: Callable[..., None],
+        old_keys: StrOrBytesPair,
+        new_keys: StrOrBytesPair,
     ) -> None:
         self._key_name = key_definition.name
-        self._on_change_key_definition = OnChangeKeyDefinition(
-            key_definition
-        )
+        self._on_change_key_definition = OnChangeKeyDefinition(key_definition)
         self._on_key_changed_callback_error_strategy = (
             key_definition.on_key_changed_callback_error_strategy
         )
-        self._strategy_function = on_error_strategy
-        self._callbacks = self._create_callbacks(
-            key_definition.on_change_callbacks
-        )
+        self._strategy_function = on_error_strategy  # type: ignore[assignment]
+        self._callbacks = self._create_callbacks(key_definition.on_change_callbacks)
         self._old_keys = old_keys
         self._new_keys = new_keys
         self._has_error = False
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Any:
         return self._callbacks[item]
 
     @staticmethod
@@ -74,33 +69,29 @@ class KeyChangedContext:
     ) -> Callbacks:
         return {
             callback_name: {
-                'name': callback_name,
-                'callback': callback,
-                'status': CallbackStatus.PENDING,
+                "name": callback_name,
+                "callback": callback,
+                "status": CallbackStatus.PENDING,
             }
             for callback_name, callback in on_change_callbacks.items()
         }
 
-    def run_callbacks(self):
+    def run_callbacks(self) -> None:
         for callback_name, callback_ctx in self._callbacks.items():
             try:
-                logger.info(
-                    'Going to execute the callback "%s"' % callback_name
-                )
-                callback_ctx['status'] = CallbackStatus.IN_PROGRESS
-                callback_ctx['callback'](
+                logger.info('Going to execute the callback "%s"' % callback_name)
+                callback_ctx["status"] = CallbackStatus.IN_PROGRESS
+                callback_ctx["callback"](
                     self._old_keys,
                     self._new_keys,
                     self._on_change_key_definition,
                 )
-                callback_ctx['status'] = CallbackStatus.SUCCEEDED
+                callback_ctx["status"] = CallbackStatus.SUCCEEDED
             except Exception as e:
                 self._has_error = True
-                callback_ctx['status'] = CallbackStatus.FAILED
-                callback_ctx['error'] = e
-                self._strategy_function(
-                    self._key_name, callback_name, self
-                )
+                callback_ctx["status"] = CallbackStatus.FAILED
+                callback_ctx["error"] = e
+                self._strategy_function(self._key_name, callback_name, self)
         if (
             self._on_key_changed_callback_error_strategy
             == OnKeyChangedCallbackErrorStrategy.SKIP_AND_RAISE

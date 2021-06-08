@@ -1,8 +1,7 @@
 from __future__ import annotations
 from enum import Enum
+from ..consts import DECRYPTED_STATE, ENCRYPTED_STATE
 from ..errors import KeysManagementError
-from ..consts import ENCRYPTED_STATE, DECRYPTED_STATE
-
 
 class SecretKeyUseCase(Enum):
     ENCRYPTION_DECRYPTION = 1
@@ -22,8 +21,4 @@ class SecretKeyUseCase(Enum):
             raise InvalidUseCaseNameError(str_val)
 
 
-class InvalidUseCaseNameError(KeysManagementError):
-    def __init__(self, bad_value: str) -> None:
-        super().__init__(
-            'Failed to parse "" to SecretKeyUseCase' % bad_value
-        )
+

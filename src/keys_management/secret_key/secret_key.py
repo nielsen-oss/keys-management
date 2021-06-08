@@ -1,87 +1,65 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
 from math import floor
-
-from .errors import InitError
-from ..consts import (
-    ENCRYPTION_KEY_TYPE,
-    PUBLIC_KEY_TYPE,
-    PRIVATE_KEY_TYPE,
-    DECRYPTION_KEY_TYPE,
-)
+from typing import TYPE_CHECKING, Any, Optional, Union
+from .errors import InitError, SecretKeyInitError, SecretKeyPairInitError
 
 if TYPE_CHECKING:
-    from .types import SecretKeyValue, SecretKeyPairValues
+    from .types import StrOrBytesPair, StrOrBytes
 
 
-class SecretKey:
-    def __init__(self, secret_key_value: SecretKeyValue):
-        if isinstance(secret_key_value, (str, tuple)):
+class SecretKeyValue:
+    _val: StrOrBytes
+
+    def __init__(self, secret_key_value: StrOrBytes):
+        if isinstance(secret_key_value, (str, bytes)):
             self._val = secret_key_value
         else:
             raise SecretKeyInitError(secret_key_value)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.censor_key()
 
-    def get_value(self) -> SecretKeyValue:
+    def get_value(self) -> StrOrBytes:
         return self._val
 
-    def censor_key(self):
+    def censor_key(self) -> str:
         """
         censorString('') = ''; censorString('a') = '*'; censorString('aa') = '**';
         censorString('aaa') = '***'; censorString('aaaa') = 'a**a'; censorString('aaaaa') = 'a***a';
         censorString('aaaaaaa') = 'a****a'; censorString('aaaaaaa') = 'a*****a';
         censorString('aaaaaaaa') = 'aa****aa';
         """
-        str_to_censor = self._val
+        str_to_censor = str(self._val)
         key_length = len(str_to_censor)
 
         revealedPartSize = min(4, floor(key_length / 4))
         return (
-                str_to_censor[0:revealedPartSize]
-                + "*" * (key_length - 2 * revealedPartSize)
-                + str_to_censor[key_length - revealedPartSize:]
-        )
-
-
-class SecretKeyInitError(InitError):
-    def __init__(self, secret_key_value: Any) -> None:
-        super().__init__(
-            'SecretKey',
-            "secret_key_value type is %s" % str(type(secret_key_value)),
+            str_to_censor[0:revealedPartSize]
+            + "*" * (key_length - 2 * revealedPartSize)
+            + str_to_censor[key_length - revealedPartSize :]
         )
 
 
 class SecretKeyPair:
-    _decrypt_key: SecretKey
-    _encrypt_key: SecretKey
+    _decrypt_key: SecretKeyValue
+    _encrypt_key: SecretKeyValue
     _is_symmetric: bool
 
-    def __init__(self, secret_key_pair_values: SecretKeyPairValues):
-        if isinstance(secret_key_pair_values, (str, bytes)):
-            encrypt_key = secret_key_pair_values
-            decrypt_key = secret_key_pair_values
-        elif isinstance(secret_key_pair_values, dict):
-            encrypt_key = (
-                secret_key_pair_values[ENCRYPTION_KEY_TYPE]
-                if ENCRYPTION_KEY_TYPE in secret_key_pair_values
-                else secret_key_pair_values.get(PUBLIC_KEY_TYPE, None)
-            )
-            decrypt_key = (
-                secret_key_pair_values[DECRYPTION_KEY_TYPE]
-                if DECRYPTION_KEY_TYPE in secret_key_pair_values
-                else secret_key_pair_values.get(PRIVATE_KEY_TYPE, None)
-            )
-        elif isinstance(secret_key_pair_values, tuple):
-            encrypt_key, decrypt_key = secret_key_pair_values
+    def __init__(self, value_or_values: Union[StrOrBytes, StrOrBytesPair]):
+        encrypt_key: StrOrBytes
+        decrypt_key: StrOrBytes
+        if isinstance(value_or_values, (str, bytes)):
+            encrypt_key = value_or_values
+            decrypt_key = value_or_values
+        elif isinstance(value_or_values, tuple) and len(value_or_values) == 2:
+            encrypt_key, decrypt_key = value_or_values
         else:
-            raise SecretKeyPairInitError(secret_key_pair_values)
-        self._encrypt_key = SecretKey(encrypt_key)
-        self._decrypt_key = SecretKey(decrypt_key)
+            raise SecretKeyPairInitError(value_or_values)
+        self._encrypt_key = SecretKeyValue(encrypt_key)
+        self._decrypt_key = SecretKeyValue(decrypt_key)
         self._is_symmetric = encrypt_key == decrypt_key
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.is_symmetric():
             return '"%s"' % str(self._decrypt_key)
         else:
@@ -96,18 +74,29 @@ class SecretKeyPair:
         return not self._is_symmetric
 
     @property
-    def decrypt_key(self) -> SecretKey:
+    def decrypt_key(self) -> SecretKeyValue:
         return self._decrypt_key
 
+
     @property
-    def encrypt_key(self) -> SecretKey:
+    def encrypt_key(self) -> SecretKeyValue:
         return self._encrypt_key
 
 
-class SecretKeyPairInitError(InitError):
-    def __init__(self, secret_key_pair_values: Any) -> None:
-        super().__init__(
-            'SecretKeyPair',
-            "secret_key_pair_values type is %s"
-            % str(type(secret_key_pair_values)),
-        )
+class SecretKeyFactory:
+    @staticmethod
+    def create(
+        value_or_values: Optional[Union[StrOrBytes, StrOrBytesPair]]
+    ) -> Optional[Union[SecretKeyValue, SecretKeyPair]]:
+        if value_or_values is None:
+            return None
+        if isinstance(value_or_values, (str, bytes)):
+            return SecretKeyValue(value_or_values)
+        elif isinstance(value_or_values, tuple):
+            return SecretKeyPair(value_or_values)
+        raise SecretKeyPairInitError(value_or_values)
+
+    def __call__(
+        self, value_or_values: Union[StrOrBytes, StrOrBytesPair]
+    ) -> Optional[Union[SecretKeyValue, SecretKeyPair]]:
+        return self.create(value_or_values)

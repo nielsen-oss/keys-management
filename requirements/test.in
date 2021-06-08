@@ -1,0 +1,10 @@
+-r base.in
+
+pytest
+pytest_mock
+pytest-custom_exit_code
+black
+isort
+mypy
+pylint
+pip-compile-multi
