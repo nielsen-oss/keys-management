@@ -39,7 +39,7 @@ def on_change(old_key: str, new_key: str, on_change_key_definition: OnChangeKeyD
 
 key_definition_properties = {
     'stateless': True,
-    'use_case': SecretKeyUseCase.AUTHENTICATION,
+    'use_case': SecretKeyUseCase.ENCRYPTION_DECRYPTION,
     'target_data_accessible': True,
     'keep_in_cache': True
 }
