@@ -5,20 +5,37 @@ from collections import OrderedDict
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 from unittest.mock import Mock
 from ..errors import OnKeyChangedCallbackErrorStrategy
-from .consts import (CALLBACK_ERROR_STRATEGY_ARG, KEEP_IN_CACHE_ARG, KEEP_IN_CACHE_PROP,
-    LAST_USE_PROP, NAME_PROP, STATELESS_ARG, STATELESS_PROP, TARGET_DATA_ACCESSIBLE_ARG,
-    TARGET_DATA_ACCESSIBLE_PROP, USE_CASE_ARG, USE_CASE_PROP,)
-from .log_messages_consts import (ERROR_STRATEGY_TYPE_ERR_MSG, KEEP_IN_CACHE_NOT_BOOL_ERR_MSG,
-    NAME_PROPERTY_IS_EMPTY_MSG, SHOULD_NOT_CONTAINS_ARGS_MSG, STATELESS_NOT_BOOL_ERR_MSG,
-    STORE_IS_NOT_CALLABLE_MSG, TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG, USE_CASE_PROP_TYPE_ERR,)
+from .consts import (
+    CALLBACK_ERROR_STRATEGY_ARG,
+    KEEP_IN_CACHE_ARG,
+    KEEP_IN_CACHE_PROP,
+    LAST_USE_PROP,
+    NAME_PROP,
+    STATELESS_ARG,
+    STATELESS_PROP,
+    TARGET_DATA_ACCESSIBLE_ARG,
+    TARGET_DATA_ACCESSIBLE_PROP,
+    USE_CASE_ARG,
+    USE_CASE_PROP,
+)
 from .errors import InitError, SecretKeyDefinitionInitError
 from .key_state import SecretKeyState
-from .secret_key import SecretKeyValue, SecretKeyFactory, SecretKeyPair
+from .log_messages_consts import (
+    ERROR_STRATEGY_TYPE_ERR_MSG,
+    KEEP_IN_CACHE_NOT_BOOL_ERR_MSG,
+    NAME_PROPERTY_IS_EMPTY_MSG,
+    SHOULD_NOT_CONTAINS_ARGS_MSG,
+    STATELESS_NOT_BOOL_ERR_MSG,
+    STORE_IS_NOT_CALLABLE_MSG,
+    TARGET_DATA_ACCESSIBLE_NOT_BOOL_ERR_MSG,
+    USE_CASE_PROP_TYPE_ERR,
+)
+from .secret_key import SecretKeyFactory, SecretKeyPair, SecretKeyValue
 from .secret_key_use_case import SecretKeyUseCase
 
 if TYPE_CHECKING:
     from ..key_changed_utils import KeyChangedCallback
-    from .types import KeysStore, StrOrBytesPair, StrOrBytes
+    from .types import KeysStore, StrOrBytes, StrOrBytesPair
 
 
 class BaseSecretKeyDefinition(ABC):
@@ -157,7 +174,9 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
 
     def set_previous_keys(
         self,
-        keys: Optional[Union[StrOrBytes, StrOrBytesPair, SecretKeyValue, SecretKeyPair]],
+        keys: Optional[
+            Union[StrOrBytes, StrOrBytesPair, SecretKeyValue, SecretKeyPair]
+        ],
     ) -> None:
         if isinstance(keys, (SecretKeyValue, SecretKeyPair)):
             self._current_keys = keys
@@ -213,6 +232,3 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
 
     def get_previous_keys(self) -> Optional[Union[SecretKeyValue, SecretKeyPair]]:
         pass
-
-
-

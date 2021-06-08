@@ -1,11 +1,20 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Optional, Union
-from .secret_key import (BaseSecretKeyDefinition, InitError, SecretKeyState,
-    SecretKeyUseCase,)
+from .secret_key import (
+    BaseSecretKeyDefinition,
+    InitError,
+    SecretKeyState,
+    SecretKeyUseCase,
+)
 
 if TYPE_CHECKING:
-    from .secret_key import (KeysStore, SecretKeyValue, SecretKeyPair, StrOrBytesPair,
-                             StrOrBytes, )
+    from .secret_key import (
+        KeysStore,
+        SecretKeyPair,
+        SecretKeyValue,
+        StrOrBytes,
+        StrOrBytesPair,
+    )
 
 
 class OnChangeKeyDefinition(SecretKeyState):
@@ -51,9 +60,7 @@ class OnChangeKeyDefinition(SecretKeyState):
     def get_previous_keys(self) -> Optional[Union[SecretKeyValue, SecretKeyPair]]:
         return self.__state.get_previous_keys()
 
-    def set_previous_keys(
-        self, keys: Union[StrOrBytes, StrOrBytesPair]
-    ) -> None:
+    def set_previous_keys(self, keys: Union[StrOrBytes, StrOrBytesPair]) -> None:
         self.__state.set_previous_keys(keys)
 
     def clean_state(self) -> None:

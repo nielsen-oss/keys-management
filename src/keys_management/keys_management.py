@@ -3,20 +3,40 @@ import logging
 from typing import TYPE_CHECKING, Callable, Dict, Optional, Union, cast
 from .consts import KEY, STATE, TRACE_LEVEL, TRACE_LEVEL_NAME
 from .dependecies import CryptoTool, StateRepoInterface
-from .errors import (FetchAndSetStateFromRepoError, GetKeyError, InvalidKeyStateError,
-    KeyChangedError, KeyIsNotDefinedError, OnKeyChangedCallbackErrorStrategy,)
+from .errors import (
+    FetchAndSetStateFromRepoError,
+    GetKeyError,
+    InvalidKeyStateError,
+    KeyChangedError,
+    KeyIsNotDefinedError,
+    OnKeyChangedCallbackErrorStrategy,
+)
 from .key_changed_utils import KeyChangedContext
-from .log_messages_consts import (CLEAN_KEYS_LOG_FORMAT, CLEAN_PREV_KEYS_LOG_FORMAT,
-    DEFINE_KEY_LOG_FORMAT, GET_KEY_DEBUG_FORMAT, GET_KEY_INFO_FORMAT,
-    KEY_CHANGED_DEBUG_FORMAT, KEY_CHANGED_INFO_FORMAT, ON_HALT_LOG_FORMAT,
-    ON_SKIP_LOG_FORMAT, REGISTER_ON_CHANGE_LOG_FORMAT, RV_KEY_LOG_FORMAT,
-    SUCCESS_DEFINE_KEY_LOG_FORMAT,)
-from .secret_key import (InvalidUseCaseNameError, SecretKeyValue, SecretKeyDefinition,
-                         SecretKeyPair, SecretKeyUseCase, )
+from .log_messages_consts import (
+    CLEAN_KEYS_LOG_FORMAT,
+    CLEAN_PREV_KEYS_LOG_FORMAT,
+    DEFINE_KEY_LOG_FORMAT,
+    GET_KEY_DEBUG_FORMAT,
+    GET_KEY_INFO_FORMAT,
+    KEY_CHANGED_DEBUG_FORMAT,
+    KEY_CHANGED_INFO_FORMAT,
+    ON_HALT_LOG_FORMAT,
+    ON_SKIP_LOG_FORMAT,
+    REGISTER_ON_CHANGE_LOG_FORMAT,
+    RV_KEY_LOG_FORMAT,
+    SUCCESS_DEFINE_KEY_LOG_FORMAT,
+)
+from .secret_key import (
+    InvalidUseCaseNameError,
+    SecretKeyDefinition,
+    SecretKeyPair,
+    SecretKeyUseCase,
+    SecretKeyValue,
+)
 
 if TYPE_CHECKING:
     from .key_changed_utils import KeyChangedCallback
-    from .secret_key import KeysStore, StrOrBytesPair, StrOrBytes
+    from .secret_key import KeysStore, StrOrBytes, StrOrBytesPair
 
 logging.addLevelName(TRACE_LEVEL, TRACE_LEVEL_NAME)
 logger = logging.getLogger(__name__)
@@ -43,9 +63,7 @@ class KeysManagement(object):
     ) -> KeysManagement:
         raise NotImplementedError()
 
-    def get_key(
-        self, key_name: str, purpose: SecretKeyUseCase = None
-    ) -> StrOrBytes:
+    def get_key(self, key_name: str, purpose: SecretKeyUseCase = None) -> StrOrBytes:
         raise NotImplementedError()
 
     def get_encrypt_key(self, key_name: str) -> StrOrBytes:
@@ -125,9 +143,7 @@ class KeysManagementImpl(KeysManagement):
         self._keys_definitions[name] = key_definition
         return self
 
-    def get_key(
-        self, key_name: str, purpose: SecretKeyUseCase = None
-    ) -> StrOrBytes:
+    def get_key(self, key_name: str, purpose: SecretKeyUseCase = None) -> StrOrBytes:
         try:
             if not logger.isEnabledFor(logging.DEBUG):
                 logger.info(GET_KEY_INFO_FORMAT.format(key_name))
@@ -166,10 +182,11 @@ class KeysManagementImpl(KeysManagement):
         key_definition.clean_keys()
         key_definition.set_last_use_case(purpose)
         if self._is_clean_previous_keys(key_definition, purpose):
-            logger.log(TRACE_LEVEL, CLEAN_PREV_KEYS_LOG_FORMAT % key_definition.name,
+            logger.log(
+                TRACE_LEVEL,
+                CLEAN_PREV_KEYS_LOG_FORMAT % key_definition.name,
             )
             key_definition.clean_previous_keys()
-
 
     @staticmethod
     def _is_clean_previous_keys(
@@ -203,7 +220,9 @@ class KeysManagementImpl(KeysManagement):
         else:  # purpose == SecretKeyUseCase.DECRYPTION:
             return self._get_key_for_decryption(key_definition)
 
-    def _get_key_for_decryption(self, key_definition: SecretKeyDefinition) -> SecretKeyValue:
+    def _get_key_for_decryption(
+        self, key_definition: SecretKeyDefinition
+    ) -> SecretKeyValue:
         if not key_definition.has_keys():
             if (
                 key_definition.get_last_use_case() is None
@@ -216,7 +235,9 @@ class KeysManagementImpl(KeysManagement):
                 key_definition.set_keys_from_store()
         return key_definition.get_previous_or_current_keys().decrypt_key  # type: ignore[union-attr]
 
-    def _get_key_for_encryption(self, key_definition: SecretKeyDefinition) -> SecretKeyValue:
+    def _get_key_for_encryption(
+        self, key_definition: SecretKeyDefinition
+    ) -> SecretKeyValue:
         key_definition.set_keys_from_store()
         return key_definition.keys.encrypt_key  # type: ignore[union-attr]
 

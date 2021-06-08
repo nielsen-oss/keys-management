@@ -30,7 +30,7 @@ class KeyDefForTest(BaseSecretKeyDefinition):
 
         def side_effect() -> Keys:
             if isinstance(self.keys, Dict):
-                return self.keys['encrypt'], self.keys['decrypt']
+                return self.keys["encrypt"], self.keys["decrypt"]
             else:
                 return self.keys
 

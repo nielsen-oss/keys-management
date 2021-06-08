@@ -3,6 +3,7 @@ from enum import Enum
 from ..consts import DECRYPTED_STATE, ENCRYPTED_STATE
 from ..errors import KeysManagementError
 
+
 class SecretKeyUseCase(Enum):
     ENCRYPTION_DECRYPTION = 1
     ENCRYPTION = 2
@@ -19,6 +20,3 @@ class SecretKeyUseCase(Enum):
             return SecretKeyUseCase[str_val.upper()]
         except KeyError:
             raise InvalidUseCaseNameError(str_val)
-
-
-
