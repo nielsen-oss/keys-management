@@ -47,7 +47,7 @@ jobs:
         with:
           add: VERSION setup.cfg
           message: "Bump version: ${{ steps.previous_version.outputs.version }} → ${{ steps.current_version.outputs.version }}"
-          push: origin ${branch input} --set-upstream --force
+          push: origin main --set-upstream --force
       - name: Build a binary wheel and a source tarball
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: >-

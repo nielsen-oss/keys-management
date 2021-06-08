@@ -150,3 +150,5 @@ After current purpose is determined,
 
    Button line - when the key is changed, but it defined to keep in cache, keys management helps you not losing the encrypted objects since the it keep the last decrypt key!  
 If the keys marked as "stated" and it is important for the client to maintains the state in the repository, it should call the save state immediate after getting the key. 
+
+test
