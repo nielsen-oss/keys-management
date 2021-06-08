@@ -111,8 +111,50 @@ After KeyChanged declared, all the callbacks are executed.
 |  **StateRepoInterface**	|   TODO	|
 |  **CryptoTool**	        |  TODO 	|
 
+## Examples
+### Authtication to third_party client
+Assume there is a third_party client called 3p_client 
+
+```python
+# 3p_client package
+class Client:
+    def __init__(self, access_token):
+        self.set_access_token(access_token)
+    
+    def get_data(self):
+        ''' use the access token and return some data'''
+        pass
+
+    def set_access_token(self, access_token):
+        self.access_token = access_token
+```
+Inside the app initialization
+
+```python
+import keys_management
+from os import environ
+
+CLIENT_ACCESS_TOKEN = "CLIENT_ACCESS_TOKEN"
 
 
+def ket_from_env():
+    return environ.get(CLIENT_ACCESS_TOKEN)
+
+
+keys_management.define_key(CLIENT_ACCESS_TOKEN, ket_from_env,
+                           use_case=SecretKeyUseCase.AUTHENTICATION)
+
+from 3p_client import Client
+
+client = Client(access_token=keys_management.get_key(CLIENT_ACCESS_TOKEN))
+
+def on_client_access_token_changed(old_key: str, new_key: str, on_change_key_definition: OnChangeKeyDefinition)
+    client.set_access_token(new_key)
+    on_change_key_definition.
+
+
+
+```
 
 # Advanced
 
@@ -129,6 +171,7 @@ There are few reasons why to use a secret key:
    authenticate other users or sending our credentials like a password, the type of the key (password, symmetric or 
    asymmetric) doesn't really matter since only one key is playing the role of process.
    
+
 
 ## key internal flows 
 
@@ -151,4 +194,3 @@ After current purpose is determined,
    Button line - when the key is changed, but it defined to keep in cache, keys management helps you not losing the encrypted objects since the it keep the last decrypt key!  
 If the keys marked as "stated" and it is important for the client to maintains the state in the repository, it should call the save state immediate after getting the key. 
 
-test
