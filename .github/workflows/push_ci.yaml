@@ -13,7 +13,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
@@ -23,6 +22,15 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
+      - name: Verify Changed files under src
+        uses: tj-actions/verify-changed-files@v6.2
+        id: verify-changed-files
+        with:
+          files: |
+            src
+            docs
+            requirements
+            README.*
       - name: set previous version
         id: previous_version
         run: echo ::set-output name=version::$(cat VERSION)
@@ -31,15 +39,6 @@ jobs:
       - name: set current version
         id: current_version
         run: echo ::set-output name=version::$(cat VERSION)
-      - name: Verify Changed files under src
-        uses: tj-actions/verify-changed-files@v6.2
-        id: verify-changed-files
-        with:
-          files: |
-             src
-             docs
-             requirements
-             README.me
       - uses: EndBug/add-and-commit@v7
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         with:
