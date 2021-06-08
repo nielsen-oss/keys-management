@@ -63,7 +63,7 @@ class KeysManagement(object):
     ) -> KeysManagement:
         raise NotImplementedError()
 
-    def get_key(self, key_name: str, purpose: SecretKeyUseCase = None) -> StrOrBytes:
+    def get_key(self, key_name: str, purpose: SecretKeyUseCase) -> StrOrBytes:
         raise NotImplementedError()
 
     def get_encrypt_key(self, key_name: str) -> StrOrBytes:
@@ -288,8 +288,8 @@ class KeysManagementImpl(KeysManagement):
     def key_changed(
         self,
         key_name: str,
-        old_keys: StrOrBytesPair,
-        new_keys: StrOrBytesPair,
+        old_keys: Union[StrOrBytes, StrOrBytesPair] = None,
+        new_keys: Union[StrOrBytes, StrOrBytesPair] = None,
     ) -> None:
         try:
             if logger.isEnabledFor(logging.DEBUG):
@@ -360,8 +360,8 @@ class KeysManagementImpl(KeysManagement):
     def _create_context(
         self,
         key_definition: SecretKeyDefinition,
-        old_keys: StrOrBytesPair,
-        new_keys: StrOrBytesPair,
+        old_keys: Union[StrOrBytes, StrOrBytesPair],
+        new_keys: Union[StrOrBytes, StrOrBytesPair],
     ) -> KeyChangedContext:
         return KeyChangedContext(
             key_definition,

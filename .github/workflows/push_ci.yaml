@@ -45,6 +45,7 @@ jobs:
       - uses: EndBug/add-and-commit@v7
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         with:
+          author_email: ofek1israel@gmail.com
           add: VERSION setup.cfg
           message: "Bump version: ${{ steps.previous_version.outputs.version }} → ${{ steps.current_version.outputs.version }}"
           push: origin main

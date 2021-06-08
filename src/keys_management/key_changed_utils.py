@@ -19,8 +19,8 @@ if TYPE_CHECKING:
     from .secret_key import StrOrBytesPair
     from .secret_key.key_definition import SecretKeyDefinition
 
-    OldKeys = StrOrBytesPair
-    newKeys = StrOrBytesPair
+    OldKeys = Union[StrOrBytes, StrOrBytesPair]
+    newKeys = Union[StrOrBytes, StrOrBytesPair]
     KeyChangedCallback = Callable[
         [
             OldKeys,
@@ -46,8 +46,8 @@ class KeyChangedContext:
         self,
         key_definition: SecretKeyDefinition,
         on_error_strategy: Callable[..., None],
-        old_keys: StrOrBytesPair,
-        new_keys: StrOrBytesPair,
+        old_keys: Union[StrOrBytes, StrOrBytesPair],
+        new_keys: Union[StrOrBytes, StrOrBytesPair],
     ) -> None:
         self._key_name = key_definition.name
         self._on_change_key_definition = OnChangeKeyDefinition(key_definition)
