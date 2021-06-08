@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional, Union
 
 if TYPE_CHECKING:
-    from .secret_key import SecretKey, SecretKeyPair
+    from .secret_key import SecretKeyValue, SecretKeyPair
     from .secret_key_use_case import SecretKeyUseCase
-    from .types import SecretKeyPairValues, SecretKeyValue
+    from .types import StrOrBytesPair, StrOrBytes
 
 
 class SecretKeyState(ABC):
@@ -18,12 +18,12 @@ class SecretKeyState(ABC):
         pass
 
     @abstractmethod
-    def get_previous_keys(self) -> Optional[Union[SecretKey, SecretKeyPair]]:
+    def get_previous_keys(self) -> Optional[Union[SecretKeyValue, SecretKeyPair]]:
         pass
 
     @abstractmethod
     def set_previous_keys(
-        self, keys: Union[SecretKeyValue, SecretKeyPairValues]
+        self, keys: Union[StrOrBytes, StrOrBytesPair]
     ) -> None:
         pass
 

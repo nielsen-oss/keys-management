@@ -3,7 +3,6 @@ from enum import Enum
 from ..consts import DECRYPTED_STATE, ENCRYPTED_STATE
 from ..errors import KeysManagementError
 
-
 class SecretKeyUseCase(Enum):
     ENCRYPTION_DECRYPTION = 1
     ENCRYPTION = 2
@@ -22,6 +21,4 @@ class SecretKeyUseCase(Enum):
             raise InvalidUseCaseNameError(str_val)
 
 
-class InvalidUseCaseNameError(KeysManagementError):
-    def __init__(self, bad_value: str) -> None:
-        super().__init__("Failed to parse %s to SecretKeyUseCase" % bad_value)
+

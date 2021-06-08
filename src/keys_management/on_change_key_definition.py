@@ -4,8 +4,8 @@ from .secret_key import (BaseSecretKeyDefinition, InitError, SecretKeyState,
     SecretKeyUseCase,)
 
 if TYPE_CHECKING:
-    from .secret_key import (KeysStore, SecretKey, SecretKeyPair, SecretKeyPairValues,
-        SecretKeyValue,)
+    from .secret_key import (KeysStore, SecretKeyValue, SecretKeyPair, StrOrBytesPair,
+                             StrOrBytes, )
 
 
 class OnChangeKeyDefinition(SecretKeyState):
@@ -48,11 +48,11 @@ class OnChangeKeyDefinition(SecretKeyState):
     def set_last_use_case(self, last_use: SecretKeyUseCase) -> None:
         self.__state.set_last_use_case(last_use)
 
-    def get_previous_keys(self) -> Optional[Union[SecretKey, SecretKeyPair]]:
+    def get_previous_keys(self) -> Optional[Union[SecretKeyValue, SecretKeyPair]]:
         return self.__state.get_previous_keys()
 
     def set_previous_keys(
-        self, keys: Union[SecretKeyValue, SecretKeyPairValues]
+        self, keys: Union[StrOrBytes, StrOrBytesPair]
     ) -> None:
         self.__state.set_previous_keys(keys)
 

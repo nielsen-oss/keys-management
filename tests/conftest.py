@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Callable, List, Tuple
 from pytest import fixture
 from pytest_mock import MockerFixture
 from keys_management import (CryptoTool, KeysManagement,
-    OnKeyChangedCallbackErrorStrategy, StateRepoInterface,)
+                             OnKeyChangedCallbackErrorStrategy, StateRepoInterface, )
 from keys_management.secret_key import SecretKeyUseCase
 from . import KeyDefForTest
 
@@ -45,8 +45,8 @@ def stated_key() -> str:
 
 @fixture
 def keys_management(
-    empty_keys_management: KeysManagement,
-    all_key_definitions: List[KeyDefForTest],
+        empty_keys_management: KeysManagement,
+        all_key_definitions: List[KeyDefForTest],
 ) -> KeysManagement:
     for key_def in all_key_definitions:
         empty_keys_management.define_key(
@@ -100,7 +100,7 @@ def convert_key_name_to_value(name: str) -> str:
 
 @fixture
 def DE_stated_not_accessible(
-    key_definition_factory: KeyDefinitionFactory,
+        key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
     key_name = "DE_stated_not_accessible"
     return key_definition_factory(
@@ -128,7 +128,7 @@ def DE_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDef
 
 @fixture
 def DE_stateless_not_accessible(
-    key_definition_factory: KeyDefinitionFactory,
+        key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
     key_name = "DE_stateless_not_accessible"
     return key_definition_factory(
@@ -143,7 +143,7 @@ def DE_stateless_not_accessible(
 
 @fixture
 def DE_stateless_accessible(
-    key_definition_factory: KeyDefinitionFactory,
+        key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
     key_name = "DE_stateless_accessible"
     return key_definition_factory(
@@ -158,7 +158,7 @@ def DE_stateless_accessible(
 
 @fixture
 def DE_not_cached_accessible(
-    key_definition_factory: KeyDefinitionFactory,
+        key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
     key_name = "DE_not_cached_accessible"
     return key_definition_factory(
@@ -173,7 +173,7 @@ def DE_not_cached_accessible(
 
 @fixture
 def DE_not_cached_not_accessible(
-    key_definition_factory: KeyDefinitionFactory,
+        key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
     key_name = "DE_not_cached_not_accessible"
     return key_definition_factory(
@@ -188,7 +188,7 @@ def DE_not_cached_not_accessible(
 
 @fixture
 def A_stated_not_accessible(
-    key_definition_factory: KeyDefinitionFactory,
+        key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
     key_name = "A_stated_not_accessible"
     key_val = convert_key_name_to_value(key_name)
@@ -220,7 +220,7 @@ def A_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefF
 
 @fixture
 def A_stateless_not_accessible(
-    key_definition_factory: KeyDefinitionFactory,
+        key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
     key_name = "A_stateless_not_accessible"
     key_val = convert_key_name_to_value(key_name)
@@ -237,7 +237,7 @@ def A_stateless_not_accessible(
 
 @fixture
 def A_stateless_accessible(
-    key_definition_factory: KeyDefinitionFactory,
+        key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
     key_name = "A_stateless_accessible"
     key_val = convert_key_name_to_value(key_name)
@@ -274,7 +274,7 @@ def stated_key_def(stated_key_name: str, stated_key: str) -> KeyDefForTest:
 
 @fixture
 def halt_error_strategy_key_def(
-    stateless_key_name: str, stateless_key: str
+        stateless_key_name: str, stateless_key: str
 ) -> KeyDefForTest:
     name = "HALT_KEY_DEF"
     return KeyDefForTest(
@@ -288,7 +288,7 @@ def halt_error_strategy_key_def(
 
 @fixture
 def skip_error_strategy_key_def(
-    stateless_key_name: str, stateless_key: str
+        stateless_key_name: str, stateless_key: str
 ) -> KeyDefForTest:
     name = "SKIP_KEY_DEF"
     return KeyDefForTest(
@@ -302,7 +302,7 @@ def skip_error_strategy_key_def(
 
 @fixture
 def skip_raise_error_strategy_key_def(
-    stateless_key_name: str, stateless_key: str
+        stateless_key_name: str, stateless_key: str
 ) -> KeyDefForTest:
     name = "SKIP_AND_RAISE_KEY_DEF"
     return KeyDefForTest(
@@ -316,7 +316,7 @@ def skip_raise_error_strategy_key_def(
 
 @fixture
 def raise_error_strategy_key_def(
-    stateless_key_name: str, stateless_key: str
+        stateless_key_name: str, stateless_key: str
 ) -> KeyDefForTest:
     name = "RAISE_KEY_DEF"
     return KeyDefForTest(
@@ -330,22 +330,22 @@ def raise_error_strategy_key_def(
 
 @fixture
 def all_key_definitions(
-    DE_stated_not_accessible: KeyDefForTest,
-    DE_stated_accessible: KeyDefForTest,
-    DE_stateless_not_accessible: KeyDefForTest,
-    DE_stateless_accessible: KeyDefForTest,
-    DE_not_cached_not_accessible: KeyDefForTest,
-    DE_not_cached_accessible: KeyDefForTest,
-    A_stated_not_accessible: KeyDefForTest,
-    A_stated_accessible: KeyDefForTest,
-    A_stateless_not_accessible: KeyDefForTest,
-    A_stateless_accessible: KeyDefForTest,
-    stateless_key_def: KeyDefForTest,
-    stated_key_def: KeyDefForTest,
-    halt_error_strategy_key_def: KeyDefForTest,
-    skip_error_strategy_key_def: KeyDefForTest,
-    skip_raise_error_strategy_key_def: KeyDefForTest,
-    raise_error_strategy_key_def: KeyDefForTest,
+        DE_stated_not_accessible: KeyDefForTest,
+        DE_stated_accessible: KeyDefForTest,
+        DE_stateless_not_accessible: KeyDefForTest,
+        DE_stateless_accessible: KeyDefForTest,
+        DE_not_cached_not_accessible: KeyDefForTest,
+        DE_not_cached_accessible: KeyDefForTest,
+        A_stated_not_accessible: KeyDefForTest,
+        A_stated_accessible: KeyDefForTest,
+        A_stateless_not_accessible: KeyDefForTest,
+        A_stateless_accessible: KeyDefForTest,
+        stateless_key_def: KeyDefForTest,
+        stated_key_def: KeyDefForTest,
+        halt_error_strategy_key_def: KeyDefForTest,
+        skip_error_strategy_key_def: KeyDefForTest,
+        skip_raise_error_strategy_key_def: KeyDefForTest,
+        raise_error_strategy_key_def: KeyDefForTest,
 ) -> List[KeyDefForTest]:
     return [
         DE_stated_not_accessible,

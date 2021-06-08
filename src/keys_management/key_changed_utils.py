@@ -16,11 +16,11 @@ class CallbackStatus(Enum):
 
 
 if TYPE_CHECKING:
-    from .secret_key import SecretKeyPairValues
+    from .secret_key import StrOrBytesPair
     from .secret_key.key_definition import SecretKeyDefinition
 
-    OldKeys = SecretKeyPairValues
-    newKeys = SecretKeyPairValues
+    OldKeys = StrOrBytesPair
+    newKeys = StrOrBytesPair
     KeyChangedCallback = Callable[
         [
             OldKeys,
@@ -39,15 +39,15 @@ class KeyChangedContext:
     _strategy_function: Callable[..., None]
     _callbacks: Callbacks
     _has_error: bool
-    _old_keys: SecretKeyPairValues
-    _new_keys: SecretKeyPairValues
+    _old_keys: StrOrBytesPair
+    _new_keys: StrOrBytesPair
 
     def __init__(
         self,
         key_definition: SecretKeyDefinition,
         on_error_strategy: Callable[..., None],
-        old_keys: SecretKeyPairValues,
-        new_keys: SecretKeyPairValues,
+        old_keys: StrOrBytesPair,
+        new_keys: StrOrBytesPair,
     ) -> None:
         self._key_name = key_definition.name
         self._on_change_key_definition = OnChangeKeyDefinition(key_definition)

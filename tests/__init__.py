@@ -29,7 +29,10 @@ class KeyDefForTest(BaseSecretKeyDefinition):
         self.previous_keys = None
 
         def side_effect() -> Keys:
-            return self.keys
+            if isinstance(self.keys, Dict):
+                return self.keys['encrypt'], self.keys['decrypt']
+            else:
+                return self.keys
 
         super().__init__(name, mock.MagicMock(side_effect=side_effect), **kwargs)
 

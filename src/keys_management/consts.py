@@ -1,8 +1,8 @@
 from logging import DEBUG
 
-KEEP_STATE: str = "keep_state"
-KEY: str = "key"
-STATE: str = "state"
+KEEP_STATE = "keep_state"
+KEY = "key"
+STATE = "state"
 KEYS_STORE = "keys_store"
 ENCRYPTED_STATE = "encrypted"
 DECRYPTED_STATE = "decrypted"

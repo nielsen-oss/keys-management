@@ -11,4 +11,4 @@ from .secret_key import (BaseSecretKeyDefinition, InvalidUseCaseNameError,
 
 if TYPE_CHECKING:
     from .key_changed_utils import KeyChangedCallback
-    from .secret_key import KeysStore, SecretKeyPairValues, SecretKeyValue
+    from .secret_key import KeysStore, StrOrBytesPair, StrOrBytes
