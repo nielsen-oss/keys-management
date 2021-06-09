@@ -194,10 +194,10 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
             return self._previous_keys
         return self._current_keys
 
-    def get_last_use_case(self) -> Optional[SecretKeyUseCase]:
+    def get_last_flow(self) -> Optional[SecretKeyFlow]:
         return self._last_use
 
-    def set_last_use_case(self, use_case: Optional[SecretKeyUseCase]) -> None:
+    def set_last_flow(self, use_case: Optional[SecretKeyFlow]) -> None:
         self._last_use = use_case
 
     def has_keys(self) -> bool:
@@ -214,7 +214,7 @@ class SecretKeyDefinition(BaseSecretKeyDefinition, SecretKeyState):
         return self
 
     def set_key_state(self, key_state: SecretKeyState) -> None:
-        self.set_last_use_case(key_state.get_last_use_case())
+        self.set_last_flow(key_state.get_last_flow())
         previous_keys: Optional[
             Union[SecretKeyValue, SecretKeyPair]
         ] = key_state.get_previous_keys()

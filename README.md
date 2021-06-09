@@ -9,7 +9,8 @@ pip package: https://pypi.org/project/keys-management/
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-keys-managemet is a layer tool to ease the usage of application secret keys when the client's application need to meet
+keys-management is a layer tool to ease the usage of application secret keys when the 
+client's application need to meet
 strict security constraints and standards for example: secret key has one specific use case and can be rotated anytime. 
 
 At first, it allows defining multiple secret keys, where each key can be defined from a different source.
@@ -144,7 +145,7 @@ class CryptoTool(object):
 
 
 ## Examples
-### Authtication to third_party client
+### Authentication to third_party client
 Assume there is a third_party client called 3p_client 
 
 ```python
@@ -174,13 +175,19 @@ def ket_from_env():
 
 
 keys_management.define_key(CLIENT_ACCESS_TOKEN, ket_from_env,
-                           use_case=SecretKeyUseCase.AUTHENTICATION)
+                           use_case=SecretKeyUseCase.AAA)
 
-from 3p_client import Client
+from
+
+3
+p_client
+import Client
 
 client = Client(access_token=keys_management.get_key(CLIENT_ACCESS_TOKEN))
 
-def on_client_access_token_changed(old_key: str, new_key: str, on_change_key_definition: OnChangeKeyDefinition)
+
+def on_client_access_token_changed(old_key: str, new_key: str,
+                                   on_change_key_definition: OnChangeKeyDefinition)
     client.set_access_token(new_key)
     on_change_key_definition.
 

@@ -103,14 +103,14 @@ def convert_key_name_to_value(name: str) -> str:
 
 
 @fixture
-def DE_stated_not_accessible(
+def RT_stated_not_accessible(
     key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
-    key_name = "DE_stated_not_accessible"
+    key_name = "RT_stated_not_accessible"
     return key_definition_factory(
         name=key_name,
         keys=convert_key_name_to_values(key_name),
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=False,
         target_data_accessible=False,
         keep_in_cache=True,
@@ -118,12 +118,12 @@ def DE_stated_not_accessible(
 
 
 @fixture
-def DE_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
-    key_name = "DE_stated_accessible"
+def RT_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+    key_name = "RT_stated_accessible"
     return key_definition_factory(
         name=key_name,
         keys=convert_key_name_to_values(key_name),
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=False,
         target_data_accessible=True,
         keep_in_cache=True,
@@ -131,14 +131,14 @@ def DE_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDef
 
 
 @fixture
-def DE_stateless_not_accessible(
+def RT_stateless_not_accessible(
     key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
-    key_name = "DE_stateless_not_accessible"
+    key_name = "RT_stateless_not_accessible"
     return key_definition_factory(
         name=key_name,
         keys=convert_key_name_to_values(key_name),
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=True,
         target_data_accessible=False,
         keep_in_cache=True,
@@ -146,14 +146,14 @@ def DE_stateless_not_accessible(
 
 
 @fixture
-def DE_stateless_accessible(
+def RT_stateless_accessible(
     key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
-    key_name = "DE_stateless_accessible"
+    key_name = "RT_stateless_accessible"
     return key_definition_factory(
         name=key_name,
         keys=convert_key_name_to_values(key_name),
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=True,
         target_data_accessible=True,
         keep_in_cache=True,
@@ -161,14 +161,14 @@ def DE_stateless_accessible(
 
 
 @fixture
-def DE_not_cached_accessible(
+def RT_not_cached_accessible(
     key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
-    key_name = "DE_not_cached_accessible"
+    key_name = "RT_not_cached_accessible"
     return key_definition_factory(
         name=key_name,
         keys=convert_key_name_to_values(key_name),
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=True,
         target_data_accessible=True,
         keep_in_cache=False,
@@ -176,14 +176,14 @@ def DE_not_cached_accessible(
 
 
 @fixture
-def DE_not_cached_not_accessible(
+def RT_not_cached_not_accessible(
     key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
-    key_name = "DE_not_cached_not_accessible"
+    key_name = "RT_not_cached_not_accessible"
     return key_definition_factory(
         name=key_name,
         keys=convert_key_name_to_values(key_name),
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=True,
         target_data_accessible=True,
         keep_in_cache=False,
@@ -191,15 +191,15 @@ def DE_not_cached_not_accessible(
 
 
 @fixture
-def A_stated_not_accessible(
+def OWT_stated_not_accessible(
     key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
-    key_name = "A_stated_not_accessible"
+    key_name = "OWT_stated_not_accessible"
     key_val = convert_key_name_to_value(key_name)
     return key_definition_factory(
         name=key_name,
         keys=key_val,
-        use_case=SecretKeyUseCase.AUTHENTICATION,
+        use_case=SecretKeyUseCase.ONE_WAY_TRIP,
         stateless=False,
         target_data_accessible=False,
         keep_in_cache=True,
@@ -208,13 +208,13 @@ def A_stated_not_accessible(
 
 
 @fixture
-def A_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
-    key_name = "A_stated_accessible"
+def OWT_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefForTest:
+    key_name = "OWT_stated_accessible"
     key_val = convert_key_name_to_value(key_name)
     return key_definition_factory(
         name=key_name,
         keys=key_val,
-        use_case=SecretKeyUseCase.AUTHENTICATION,
+        use_case=SecretKeyUseCase.ONE_WAY_TRIP,
         stateless=False,
         target_data_accessible=True,
         keep_in_cache=True,
@@ -223,15 +223,15 @@ def A_stated_accessible(key_definition_factory: KeyDefinitionFactory) -> KeyDefF
 
 
 @fixture
-def A_stateless_not_accessible(
+def OWT_stateless_not_accessible(
     key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
-    key_name = "A_stateless_not_accessible"
+    key_name = "OWT_stateless_not_accessible"
     key_val = convert_key_name_to_value(key_name)
     return key_definition_factory(
         name=key_name,
         keys=key_val,
-        use_case=SecretKeyUseCase.AUTHENTICATION,
+        use_case=SecretKeyUseCase.ONE_WAY_TRIP,
         stateless=True,
         target_data_accessible=False,
         keep_in_cache=True,
@@ -240,15 +240,15 @@ def A_stateless_not_accessible(
 
 
 @fixture
-def A_stateless_accessible(
+def OWT_stateless_accessible(
     key_definition_factory: KeyDefinitionFactory,
 ) -> KeyDefForTest:
-    key_name = "A_stateless_accessible"
+    key_name = "OWT_stateless_accessible"
     key_val = convert_key_name_to_value(key_name)
     return KeyDefForTest(
         name=key_name,
         keys=key_val,
-        use_case=SecretKeyUseCase.AUTHENTICATION,
+        use_case=SecretKeyUseCase.ONE_WAY_TRIP,
         stateless=True,
         target_data_accessible=True,
         keep_in_cache=True,
@@ -261,7 +261,7 @@ def stateless_key_def(stateless_key_name: str, stateless_key: str) -> KeyDefForT
     return KeyDefForTest(
         name=stateless_key_name,
         keys=stateless_key,
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=True,
     )
 
@@ -271,7 +271,7 @@ def stated_key_def(stated_key_name: str, stated_key: str) -> KeyDefForTest:
     return KeyDefForTest(
         name=stated_key_name,
         keys=stated_key,
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=False,
     )
 
@@ -284,7 +284,7 @@ def halt_error_strategy_key_def(
     return KeyDefForTest(
         name=name,
         keys=stateless_key,
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=False,
         on_key_changed_callback_error_strategy=OnKeyChangedCallbackErrorStrategy.HALT,
     )
@@ -298,7 +298,7 @@ def skip_error_strategy_key_def(
     return KeyDefForTest(
         name=name,
         keys=stateless_key,
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=False,
         on_key_changed_callback_error_strategy=OnKeyChangedCallbackErrorStrategy.SKIP,
     )
@@ -312,7 +312,7 @@ def skip_raise_error_strategy_key_def(
     return KeyDefForTest(
         name=name,
         keys=stateless_key,
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=False,
         on_key_changed_callback_error_strategy=OnKeyChangedCallbackErrorStrategy.SKIP_AND_RAISE,
     )
@@ -326,7 +326,7 @@ def raise_error_strategy_key_def(
     return KeyDefForTest(
         name=name,
         keys=stateless_key,
-        use_case=SecretKeyUseCase.ENCRYPTION_DECRYPTION,
+        use_case=SecretKeyUseCase.ROUND_TRIP,
         stateless=False,
         on_key_changed_callback_error_strategy=OnKeyChangedCallbackErrorStrategy.RAISE_IMMEDIATELY,
     )
@@ -334,34 +334,34 @@ def raise_error_strategy_key_def(
 
 @fixture
 def all_key_definitions(
-    DE_stated_not_accessible: KeyDefForTest,
-    DE_stated_accessible: KeyDefForTest,
-    DE_stateless_not_accessible: KeyDefForTest,
-    DE_stateless_accessible: KeyDefForTest,
-    DE_not_cached_not_accessible: KeyDefForTest,
-    DE_not_cached_accessible: KeyDefForTest,
-    A_stated_not_accessible: KeyDefForTest,
-    A_stated_accessible: KeyDefForTest,
-    A_stateless_not_accessible: KeyDefForTest,
-    A_stateless_accessible: KeyDefForTest,
-    stateless_key_def: KeyDefForTest,
-    stated_key_def: KeyDefForTest,
-    halt_error_strategy_key_def: KeyDefForTest,
-    skip_error_strategy_key_def: KeyDefForTest,
-    skip_raise_error_strategy_key_def: KeyDefForTest,
-    raise_error_strategy_key_def: KeyDefForTest,
+        RT_stated_not_accessible,
+        RT_stated_accessible,
+        RT_stateless_not_accessible,
+        RT_stateless_accessible,
+        RT_not_cached_not_accessible,
+        RT_not_cached_accessible,
+        OWT_stated_not_accessible: KeyDefForTest,
+        OWT_stated_accessible: KeyDefForTest,
+        OWT_stateless_not_accessible: KeyDefForTest,
+        OWT_stateless_accessible: KeyDefForTest,
+        stateless_key_def: KeyDefForTest,
+        stated_key_def: KeyDefForTest,
+        halt_error_strategy_key_def: KeyDefForTest,
+        skip_error_strategy_key_def: KeyDefForTest,
+        skip_raise_error_strategy_key_def: KeyDefForTest,
+        raise_error_strategy_key_def: KeyDefForTest,
 ) -> List[KeyDefForTest]:
     return [
-        DE_stated_not_accessible,
-        DE_stated_accessible,
-        DE_stateless_not_accessible,
-        DE_stateless_accessible,
-        DE_not_cached_not_accessible,
-        DE_not_cached_accessible,
-        A_stated_not_accessible,
-        A_stated_accessible,
-        A_stateless_not_accessible,
-        A_stateless_accessible,
+        RT_stated_not_accessible,
+        RT_stated_accessible,
+        RT_stateless_not_accessible,
+        RT_stateless_accessible,
+        RT_not_cached_not_accessible,
+        RT_not_cached_accessible,
+        OWT_stated_not_accessible,
+        OWT_stated_accessible,
+        OWT_stateless_not_accessible,
+        OWT_stateless_accessible,
         stateless_key_def,
         stated_key_def,
         halt_error_strategy_key_def,

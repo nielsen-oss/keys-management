@@ -27,10 +27,11 @@ from .log_messages_consts import (
     SUCCESS_DEFINE_KEY_LOG_FORMAT,
 )
 from .secret_key import (
-    InvalidUseCaseNameError,
+    InvalidFlowNameError,
     SecretKeyDefinition,
     SecretKeyPair,
     SecretKeyUseCase,
+    SecretKeyFlow,
     SecretKeyValue,
 )
 
@@ -41,8 +42,8 @@ if TYPE_CHECKING:
 logging.addLevelName(TRACE_LEVEL, TRACE_LEVEL_NAME)
 logger = logging.getLogger(__name__)
 
-PURPOSE_IS_NOT_USECASE_TYPE_MSG = 'purpose argument is not type of "SecretKeyUseCase"'
-PURPOSE_IS_NOT_AUTHENTICATION_MSG = "purpose is not SecretKeyUseCase.AUTHENTICATION"
+FLOW_IS_NOT_FLOW_TYPE_MSG = 'flow argument is not type of "SecretKeyFlow"'
+FLOW_IS_NOT_DEFAULT_MSG = "flow is not SecretKeyFlow.DEFAULT or aliases"
 DEFAULT_CALLBACK_NAME_FORMAT = "{}_callback_{}"
 
 
@@ -63,14 +64,20 @@ class KeysManagement(object):
     ) -> KeysManagement:
         raise NotImplementedError()
 
-    def get_key(self, key_name: str, purpose: SecretKeyUseCase) -> StrOrBytes:
+    def get_key(self, key_name: str, flow: SecretKeyFlow) -> StrOrBytes:
         raise NotImplementedError()
 
+    def get_forward_path_key(self, key_name: str) -> StrOrBytes:
+        return self.get_key(key_name, SecretKeyFlow.FORWARD_PATH)
+
     def get_encrypt_key(self, key_name: str) -> StrOrBytes:
-        return self.get_key(key_name, SecretKeyUseCase.ENCRYPTION)
+        return self.get_forward_path_key(key_name)
+
+    def get_back_path_key(self, key_name: str) -> StrOrBytes:
+        return self.get_key(key_name, SecretKeyFlow.BACK_PATH)
 
     def get_decrypt_key(self, key_name: str) -> StrOrBytes:
-        return self.get_key(key_name, SecretKeyUseCase.DECRYPTION)
+        return self.get_back_path_key(key_name)
 
     def key_changed(
         self,
@@ -116,14 +123,14 @@ class KeysManagementImpl(KeysManagement):
         }
 
     def define_key(
-        self,
-        name: str,
-        keys_store: KeysStore,
-        use_case: SecretKeyUseCase,
-        stateless: bool = None,
-        target_data_accessible: bool = None,
-        keep_in_cache: bool = None,
-        on_key_changed_callback_error_strategy: OnKeyChangedCallbackErrorStrategy = None,
+            self,
+            name: str,
+            keys_store: KeysStore,
+            use_case: SecretKeyUseCase,
+            stateless: bool = None,
+            target_data_accessible: bool = None,
+            keep_in_cache: bool = None,
+            on_key_changed_callback_error_strategy: OnKeyChangedCallbackErrorStrategy = None,
     ) -> KeysManagement:
         on_key_changed_callback_error_strategy = (
             on_key_changed_callback_error_strategy
@@ -144,153 +151,144 @@ class KeysManagementImpl(KeysManagement):
         self._keys_definitions[name] = key_definition
         return self
 
-    def get_key(self, key_name: str, purpose: SecretKeyUseCase = None) -> StrOrBytes:
+    def get_key(self, key_name: str, flow: SecretKeyFlow = None) -> StrOrBytes:
         try:
             if not logger.isEnabledFor(logging.DEBUG):
                 logger.info(GET_KEY_INFO_FORMAT.format(key_name))
             self._validate_key_name(key_name)
             key_definition = self._keys_definitions[key_name]
-            purpose = (
-                self._determine_get_key_purpose(key_definition)
-                if purpose is None
-                else purpose
-            )
-            logger.debug(GET_KEY_DEBUG_FORMAT.format(key_name, purpose.name))
-            rv_key = self._get_key_by_use_case(key_definition, purpose)
+            flow = self._determine_flow(key_definition) if flow is None else flow
+            logger.debug(GET_KEY_DEBUG_FORMAT.format(key_name, flow.name))
+            rv_key = self._get_key_by_flow(key_definition, flow)
             logger.debug(RV_KEY_LOG_FORMAT, str(rv_key))
-            self._update_key_definition_state(key_definition, purpose)
+            self._update_key_definition_state(key_definition, flow)
             return rv_key.get_value()
         except GetKeyError as e:
             raise e
         except Exception as e:
             raise GetKeyError(key_name) from e
 
-    def _get_key_by_use_case(
-        self,
-        key_definition: SecretKeyDefinition,
-        purpose: SecretKeyUseCase,
-    ) -> SecretKeyValue:
-        if key_definition.use_case == SecretKeyUseCase.ENCRYPTION_DECRYPTION:
-            return self._get_key_encryption_decryption_case(key_definition, purpose)
+    def _validate_key_name(self, key_name: str) -> None:
+        logger.info(REGISTER_ON_CHANGE_LOG_FORMAT % key_name)
+        if key_name not in self._keys_definitions:
+            raise KeyIsNotDefinedError(key_name)
+
+    def _determine_flow(self, key_definition: SecretKeyDefinition) -> SecretKeyFlow:
+        if key_definition.use_case not in {SecretKeyUseCase.ROUND_TRIP, None}:
+            return SecretKeyFlow.DEFAULT
         else:
-            return self._get_key_authentication_case(key_definition, purpose)
+            return self.__determine_flow_by_previous_flow(key_definition)
 
-    def _update_key_definition_state(
-        self, key_definition: SecretKeyDefinition, purpose: SecretKeyUseCase
-    ) -> None:
-        # todo test it
-        logger.log(TRACE_LEVEL, CLEAN_KEYS_LOG_FORMAT % key_definition.name)
-        key_definition.clean_keys()
-        key_definition.set_last_use_case(purpose)
-        if self._is_clean_previous_keys(key_definition, purpose):
-            logger.log(
-                TRACE_LEVEL,
-                CLEAN_PREV_KEYS_LOG_FORMAT % key_definition.name,
-            )
-            key_definition.clean_previous_keys()
-
-    @staticmethod
-    def _is_clean_previous_keys(
-        key_definition: SecretKeyDefinition,
-        current_purpose: SecretKeyUseCase,
-    ) -> bool:
-        return current_purpose == SecretKeyUseCase.AUTHENTICATION or (
-            current_purpose == SecretKeyUseCase.DECRYPTION
-            and not key_definition.is_keep_in_cache()
-        )
-
-    def _get_key_authentication_case(
-        self,
-        key_definition: SecretKeyDefinition,
-        purpose: SecretKeyUseCase,
-    ) -> SecretKeyValue:
-        if purpose != SecretKeyUseCase.AUTHENTICATION:
-            GetKeyError(
-                key_name=key_definition.name,
-                reason=PURPOSE_IS_NOT_AUTHENTICATION_MSG,
-            )
-        return SecretKeyValue(cast(Union[str, bytes], key_definition.keys_store()))
-
-    def _get_key_encryption_decryption_case(
-        self,
-        key_definition: SecretKeyDefinition,
-        purpose: SecretKeyUseCase,
-    ) -> SecretKeyValue:
-        if purpose == SecretKeyUseCase.ENCRYPTION:
-            return self._get_key_for_encryption(key_definition)
-        else:  # purpose == SecretKeyUseCase.DECRYPTION:
-            return self._get_key_for_decryption(key_definition)
-
-    def _get_key_for_decryption(
-        self, key_definition: SecretKeyDefinition
-    ) -> SecretKeyValue:
-        if not key_definition.has_keys():
-            if (
-                key_definition.get_last_use_case() is None
-                and key_definition.is_stated()
-            ):
-                self._fetch_and_set_state_from_repo(key_definition)
-                if not key_definition.has_keys():
-                    key_definition.set_keys_from_store()
-            else:
-                key_definition.set_keys_from_store()
-        return key_definition.get_previous_or_current_keys().decrypt_key  # type: ignore[union-attr]
-
-    def _get_key_for_encryption(
-        self, key_definition: SecretKeyDefinition
-    ) -> SecretKeyValue:
-        key_definition.set_keys_from_store()
-        return key_definition.keys.encrypt_key  # type: ignore[union-attr]
-
-    def _determine_get_key_purpose(
-        self, key_definition: SecretKeyDefinition
-    ) -> SecretKeyUseCase:
-        if key_definition.use_case not in {
-            SecretKeyUseCase.ENCRYPTION_DECRYPTION,
-            None,
-        }:
-            return key_definition.use_case
+    def __determine_flow_by_previous_flow(
+            self, key_definition: SecretKeyDefinition
+    ) -> SecretKeyFlow:
+        prev_flow = self.__get_previous_flow(key_definition)
+        if prev_flow == SecretKeyFlow.FORWARD_PATH:
+            return SecretKeyFlow.BACK_PATH
         else:
-            return self.__determine_get_key_purpose_by_previous_use(key_definition)
+            return SecretKeyFlow.FORWARD_PATH
 
-    def __determine_get_key_purpose_by_previous_use(
-        self, key_definition: SecretKeyDefinition
-    ) -> SecretKeyUseCase:
-        prev_use = self.__get_previous_use(key_definition)
-        if prev_use == SecretKeyUseCase.ENCRYPTION:
-            return SecretKeyUseCase.DECRYPTION
-        else:
-            return SecretKeyUseCase.ENCRYPTION
-
-    def __get_previous_use(
-        self, key_definition: SecretKeyDefinition
-    ) -> Optional[SecretKeyUseCase]:
-        prev_use = key_definition.get_last_use_case()
-        if prev_use is None and key_definition.is_stated():
+    def __get_previous_flow(
+            self, key_definition: SecretKeyDefinition
+    ) -> Optional[SecretKeyFlow]:
+        prev_flow = key_definition.get_last_flow()
+        if prev_flow is None and key_definition.is_stated():
             self._fetch_and_set_state_from_repo(key_definition)
-            prev_use = key_definition.get_last_use_case()
-        return prev_use
+            prev_flow = key_definition.get_last_flow()
+        return prev_flow
 
     def _fetch_and_set_state_from_repo(
-        self, key_definition: SecretKeyDefinition
+            self, key_definition: SecretKeyDefinition
     ) -> None:
         try:
             raw_state = self._crypto_tool.decrypt(
                 self._state_repo.read_state(key_definition.name)
             )
-            key_definition.set_last_use_case(SecretKeyUseCase.get(raw_state[STATE]))
+            key_definition.set_last_flow(SecretKeyFlow.get(raw_state[STATE]))
             if KEY in raw_state:
                 key_definition.set_previous_keys(raw_state[KEY])
-        except InvalidUseCaseNameError as e:
+        except InvalidFlowNameError as e:
             raise InvalidKeyStateError(key_definition.name) from e
         except Exception as e:
             raise FetchAndSetStateFromRepoError(key_definition.name) from e
 
+    def _get_key_by_flow(
+            self,
+            key_definition: SecretKeyDefinition,
+            flow: SecretKeyFlow,
+    ) -> SecretKeyValue:
+        if key_definition.use_case == SecretKeyUseCase.ROUND_TRIP:
+            return self._get_key_round_trip_case(key_definition, flow)
+        else:
+            return self._get_key_one_way_case(key_definition, flow)
+
+    def _get_key_round_trip_case(
+            self,
+            key_definition: SecretKeyDefinition,
+            flow: SecretKeyFlow,
+    ) -> SecretKeyValue:
+        if flow == SecretKeyFlow.FORWARD_PATH:
+            return self._get_key_for_forward(key_definition)
+        else:  # flow == SecretKeyFlow.BACK_PATH:
+            return self._get_key_for_back_path(key_definition)
+
+    def _get_key_for_forward(
+            self, key_definition: SecretKeyDefinition
+    ) -> SecretKeyValue:
+        key_definition.set_keys_from_store()
+        return key_definition.keys.forward_key  # type: ignore[union-attr]
+
+    def _get_key_for_back_path(
+            self, key_definition: SecretKeyDefinition
+    ) -> SecretKeyValue:
+        if not key_definition.has_keys():
+            if key_definition.get_last_flow() is None and key_definition.is_stated():
+                self._fetch_and_set_state_from_repo(key_definition)
+                if not key_definition.has_keys():
+                    key_definition.set_keys_from_store()
+            else:
+                key_definition.set_keys_from_store()
+        return key_definition.get_previous_or_current_keys().back_path_key  # type: ignore[union-attr]
+
+    def _get_key_one_way_case(
+            self,
+            key_definition: SecretKeyDefinition,
+            flow: SecretKeyFlow,
+    ) -> SecretKeyValue:
+        if flow != SecretKeyFlow.DEFAULT:
+            GetKeyError(
+                key_name=key_definition.name,
+                reason=FLOW_IS_NOT_DEFAULT_MSG,
+            )
+        return SecretKeyValue(cast(Union[str, bytes], key_definition.keys_store()))
+
+
+    def _update_key_definition_state(
+            self, key_definition: SecretKeyDefinition, flow: SecretKeyFlow
+    ) -> None:
+        # todo test it
+        logger.log(TRACE_LEVEL, CLEAN_KEYS_LOG_FORMAT % key_definition.name)
+        key_definition.clean_keys()
+        key_definition.set_last_flow(flow)
+        if self._is_clean_previous_keys(key_definition, flow):
+            logger.log( TRACE_LEVEL, CLEAN_PREV_KEYS_LOG_FORMAT % key_definition.name)
+            key_definition.clean_previous_keys()
+
+    @staticmethod
+    def _is_clean_previous_keys(
+            key_definition: SecretKeyDefinition,
+            current_flow: SecretKeyFlow,
+    ) -> bool:
+        return current_flow == SecretKeyFlow.DEFAULT or (
+                current_flow == SecretKeyFlow.BACK_PATH
+                and not key_definition.is_keep_in_cache()
+        )
+
     def key_changed(
-        self,
-        key_name: str,
-        old_keys: Union[StrOrBytes, StrOrBytesPair] = None,
-        new_keys: Union[StrOrBytes, StrOrBytesPair] = None,
+            self,
+            key_name: str,
+            old_keys: Union[StrOrBytes, StrOrBytesPair] = None,
+            new_keys: Union[StrOrBytes, StrOrBytesPair] = None,
     ) -> None:
         try:
             if logger.isEnabledFor(logging.DEBUG):
@@ -315,9 +313,9 @@ class KeysManagementImpl(KeysManagement):
 
     @staticmethod
     def _on_halt_strategy(
-        key_name: str,
-        callback_name: str,
-        key_changed_context: KeyChangedContext,
+            key_name: str,
+            callback_name: str,
+            key_changed_context: KeyChangedContext,
     ) -> None:
         logger.error(
             ON_HALT_LOG_FORMAT.format(
@@ -330,9 +328,9 @@ class KeysManagementImpl(KeysManagement):
 
     @staticmethod
     def _on_skip_strategy(
-        key_name: str,
-        callback_name: str,
-        key_changed_context: KeyChangedContext,
+            key_name: str,
+            callback_name: str,
+            key_changed_context: KeyChangedContext,
     ) -> None:
         logger.error(
             ON_SKIP_LOG_FORMAT.format(
@@ -344,25 +342,25 @@ class KeysManagementImpl(KeysManagement):
 
     @staticmethod
     def _on_skip_and_raise_strategy(
-        key_name: str,
-        callback_name: str,
-        key_changed_context: KeyChangedContext,
+            key_name: str,
+            callback_name: str,
+            key_changed_context: KeyChangedContext,
     ) -> None:
         pass
 
     @staticmethod
     def _on_raise_strategy(
-        key_name: str,
-        callback_name: str,
-        key_changed_context: KeyChangedContext,
+            key_name: str,
+            callback_name: str,
+            key_changed_context: KeyChangedContext,
     ) -> None:
         raise KeyChangedError(key_name, key_changed_context)
 
     def _create_context(
-        self,
-        key_definition: SecretKeyDefinition,
-        old_keys: Union[StrOrBytes, StrOrBytesPair],
-        new_keys: Union[StrOrBytes, StrOrBytesPair],
+            self,
+            key_definition: SecretKeyDefinition,
+            old_keys: Union[StrOrBytes, StrOrBytesPair],
+            new_keys: Union[StrOrBytes, StrOrBytesPair],
     ) -> KeyChangedContext:
         return KeyChangedContext(
             key_definition,
@@ -374,10 +372,10 @@ class KeysManagementImpl(KeysManagement):
         )
 
     def register_on_change(
-        self,
-        key_name: str,
-        on_change_func: KeyChangedCallback,
-        callback_name: str = None,
+            self,
+            key_name: str,
+            on_change_func: KeyChangedCallback,
+            callback_name: str = None,
     ) -> None:
         self._validate_key_name(key_name)
         callbacks = self._keys_definitions[key_name].on_change_callbacks
@@ -388,17 +386,12 @@ class KeysManagementImpl(KeysManagement):
         )
         callbacks[callback_name] = on_change_func
 
-    def _validate_key_name(self, key_name: str) -> None:
-        logger.info(REGISTER_ON_CHANGE_LOG_FORMAT % key_name)
-        if key_name not in self._keys_definitions:
-            raise KeyIsNotDefinedError(key_name)
-
     def save_state(self, key_name: str) -> None:
         self._validate_key_name(key_name)
-        last_use_case = self._keys_definitions[key_name].get_last_use_case()
-        raw_state = {STATE: last_use_case}
-        if last_use_case == SecretKeyUseCase.ENCRYPTION:
-            key = self.get_decrypt_key(key_name)
+        last_flow = self._keys_definitions[key_name].get_last_flow()
+        raw_state = {STATE: last_flow}
+        if last_flow == SecretKeyFlow.FORWARD_PATH:
+            key = self.get_back_path_key(key_name)
             if key is not None:
                 raw_state[KEY] = key  # type: ignore[assignment]
         self._write_state(key_name, raw_state)
