@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Dict
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 from .errors import KeyChangedError, OnKeyChangedCallbackErrorStrategy
 from .on_change_key_definition import OnChangeKeyDefinition
 
@@ -16,7 +16,7 @@ class CallbackStatus(Enum):
 
 
 if TYPE_CHECKING:
-    from .secret_key import StrOrBytesPair
+    from .secret_key import StrOrBytes, StrOrBytesPair
     from .secret_key.key_definition import SecretKeyDefinition
 
     OldKeys = Union[StrOrBytes, StrOrBytesPair]
@@ -39,15 +39,15 @@ class KeyChangedContext:
     _strategy_function: Callable[..., None]
     _callbacks: Callbacks
     _has_error: bool
-    _old_keys: StrOrBytesPair
-    _new_keys: StrOrBytesPair
+    _old_keys: Optional[Union[StrOrBytes, StrOrBytesPair]]
+    _new_keys: Optional[Union[StrOrBytes, StrOrBytesPair]]
 
     def __init__(
         self,
         key_definition: SecretKeyDefinition,
         on_error_strategy: Callable[..., None],
-        old_keys: Union[StrOrBytes, StrOrBytesPair],
-        new_keys: Union[StrOrBytes, StrOrBytesPair],
+        old_keys: Optional[Union[StrOrBytes, StrOrBytesPair]],
+        new_keys: Optional[Union[StrOrBytes, StrOrBytesPair]],
     ) -> None:
         self._key_name = key_definition.name
         self._on_change_key_definition = OnChangeKeyDefinition(key_definition)
