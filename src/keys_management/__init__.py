@@ -16,8 +16,8 @@ from .secret_key import (
     BaseSecretKeyDefinition,
     InvalidFlowNameError,
     SecretKeyDefinitionInitError,
+    SecretKeyFlow,
     SecretKeyUseCase,
-    SecretKeyFlow
 )
 
 if TYPE_CHECKING:

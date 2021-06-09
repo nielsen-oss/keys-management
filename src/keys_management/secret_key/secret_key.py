@@ -41,30 +41,30 @@ class SecretKeyValue:
 
 
 class SecretKeyPair:
-    _decrypt_key: SecretKeyValue
-    _encrypt_key: SecretKeyValue
+    _forward_path_key: SecretKeyValue
+    _back_path_key: SecretKeyValue
     _is_symmetric: bool
 
     def __init__(self, value_or_values: Union[StrOrBytes, StrOrBytesPair]):
-        encrypt_key: StrOrBytes
-        decrypt_key: StrOrBytes
+        forward_path_key: StrOrBytes
+        back_path_key: StrOrBytes
         if isinstance(value_or_values, (str, bytes)):
-            encrypt_key = value_or_values
-            decrypt_key = value_or_values
+            forward_path_key = value_or_values
+            back_path_key = value_or_values
         elif isinstance(value_or_values, tuple) and len(value_or_values) == 2:
-            encrypt_key, decrypt_key = value_or_values
+            forward_path_key, back_path_key = value_or_values
         else:
             raise SecretKeyPairInitError(value_or_values)
-        self._encrypt_key = SecretKeyValue(encrypt_key)
-        self._decrypt_key = SecretKeyValue(decrypt_key)
-        self._is_symmetric = encrypt_key == decrypt_key
+        self._forward_path_key = SecretKeyValue(forward_path_key)
+        self._back_path_key = SecretKeyValue(back_path_key)
+        self._is_symmetric = forward_path_key == back_path_key
 
     def __str__(self) -> str:
         if self.is_symmetric():
-            return '"%s"' % str(self._decrypt_key)
+            return '"%s"' % str(self._back_path_key)
         else:
             return 'encrypt: "{}", decrypt: "{}"'.format(
-                str(self._encrypt_key), str(self._decrypt_key)
+                str(self._forward_path_key), str(self._back_path_key)
             )
 
     def is_symmetric(self) -> bool:
@@ -75,11 +75,11 @@ class SecretKeyPair:
 
     @property
     def back_path_key(self) -> SecretKeyValue:
-        return self._decrypt_key
+        return self._back_path_key
 
     @property
     def forward_key(self) -> SecretKeyValue:
-        return self._encrypt_key
+        return self._forward_path_key
 
 
 class SecretKeyFactory:

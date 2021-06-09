@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional, Union
 
 if TYPE_CHECKING:
     from .secret_key import SecretKeyPair, SecretKeyValue
-    from .secret_key_use_case import SecretKeyUseCase, SecretKeyFlow
+    from .secret_key_use_case import SecretKeyFlow, SecretKeyUseCase
     from .types import StrOrBytes, StrOrBytesPair
 
 

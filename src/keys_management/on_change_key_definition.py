@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 from .secret_key import (
     BaseSecretKeyDefinition,
     InitError,
+    SecretKeyFlow,
     SecretKeyState,
     SecretKeyUseCase,
 )
@@ -46,9 +47,6 @@ class OnChangeKeyDefinition(SecretKeyState):
     @property
     def use_case(self) -> SecretKeyUseCase:
         return self.__original_key_definition.use_case
-
-    def is_target_data_accessible(self) -> bool:
-        return self.__original_key_definition.is_target_data_accessible()
 
     def is_keep_in_cache(self) -> bool:
         return self.__original_key_definition.is_keep_in_cache()
