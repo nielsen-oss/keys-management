@@ -103,9 +103,10 @@ class KeysManagementImpl(KeysManagement):
         OnKeyChangedCallbackErrorStrategy, Callable
     ]
 
-    def __init__(self, state_repo: StateRepoInterface, crypto_tool: CryptoTool):
-        self._state_repo = state_repo
-        self._crypto_tool = crypto_tool
+    def __init__(self, state_repo: Optional[StateRepoInterface] = None, crypto_tool:
+    Optional[CryptoTool] = None):
+        self._state_repo = state_repo if state_repo is not None else StateRepoInterface()
+        self._crypto_tool = crypto_tool if crypto_tool is not None else CryptoTool()
         self._keys_definitions = {}
         self._callbacks_executions_error_handling = {
             OnKeyChangedCallbackErrorStrategy.HALT: KeysManagementImpl._on_halt_strategy,
