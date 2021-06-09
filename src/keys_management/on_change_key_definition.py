@@ -53,11 +53,11 @@ class OnChangeKeyDefinition(SecretKeyState):
     def is_keep_in_cache(self) -> bool:
         return self.__original_key_definition.is_keep_in_cache()
 
-    def get_last_use_case(self) -> Optional[SecretKeyUseCase]:
-        return self.__state.get_last_use_case()
+    def get_last_flow(self) -> Optional[SecretKeyFlow]:
+        return self.__state.get_last_flow()
 
-    def set_last_use_case(self, last_use: SecretKeyUseCase) -> None:
-        self.__state.set_last_use_case(last_use)
+    def set_last_flow(self, last_use: SecretKeyFlow) -> None:
+        self.__state.set_last_flow(last_use)
 
     def get_previous_keys(self) -> Optional[Union[SecretKeyValue, SecretKeyPair]]:
         return self.__state.get_previous_keys()

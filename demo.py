@@ -70,7 +70,7 @@ def key_from_env():
 # no need to define it with: stateless, target_data_accessible and keep_in_cache
 # since it used with AUTHENTICATION use_case, no state is required
 keys_management.define_key(CLIENT_ACCESS_TOKEN, key_from_env,
-                           use_case=SecretKeyUseCase.AUTHENTICATION)
+                           use_case=SecretKeyUseCase.AAA)
 
 
 client = ClientExample(access_token=keys_management.get_key(CLIENT_ACCESS_TOKEN))
@@ -131,7 +131,7 @@ keys_management.define_key(EXAMPLE2_DATA, example2_keys_from_config_module,
 def on_example2_data_key_changed(old_keys, new_keys, on_change_key_definition:
 OnChangeKeyDefinition):
     # here you can log and then:
-    if on_change_key_definition.get_last_use_case() is SecretKeyUseCase.ENCRYPTION:
+    if on_change_key_definition.get_last_flow() is SecretKeyUseCase.ENCRYPTION:
         example2_data = get_example2_data(key=old_keys[1]) # decrypt with the old key
         save_example2_data(example2_data, key=new_keys[0]) # encrtpy with new key
     keys_management.save_state(on_change_key_definition.name)
@@ -140,10 +140,10 @@ OnChangeKeyDefinition):
 def on_example2_data_key_changed2(old_keys, new_keys, on_change_key_definition:
 OnChangeKeyDefinition):
     # here you can log and then:
-    if on_change_key_definition.get_last_use_case() is SecretKeyUseCase.ENCRYPTION:
+    if on_change_key_definition.get_last_flow() is SecretKeyUseCase.ENCRYPTION:
         people_data = get_example2_data(key=old_keys[1]) # decrypt with the old key
         # since it only decrypt the data, change the data
-        on_change_key_definition.set_last_use_case(SecretKeyUseCase.DECRYPTION)
+        on_change_key_definition.set_last_flow(SecretKeyUseCase.DECRYPTION)
     # here we don't save the state, our app calls save states on exit/or failuers
 
 

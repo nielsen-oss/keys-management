@@ -4,17 +4,17 @@ from typing import TYPE_CHECKING, Optional, Union
 
 if TYPE_CHECKING:
     from .secret_key import SecretKeyPair, SecretKeyValue
-    from .secret_key_use_case import SecretKeyUseCase
+    from .secret_key_use_case import SecretKeyUseCase, SecretKeyFlow
     from .types import StrOrBytes, StrOrBytesPair
 
 
 class SecretKeyState(ABC):
     @abstractmethod
-    def get_last_use_case(self) -> Optional[SecretKeyUseCase]:
+    def get_last_flow(self) -> Optional[SecretKeyFlow]:
         pass
 
     @abstractmethod
-    def set_last_use_case(self, last_use: SecretKeyUseCase) -> None:
+    def set_last_flow(self, last_use: SecretKeyFlow) -> None:
         pass
 
     @abstractmethod

@@ -14,9 +14,10 @@ from .on_change_key_definition import (
 )
 from .secret_key import (
     BaseSecretKeyDefinition,
-    InvalidUseCaseNameError,
+    InvalidFlowNameError,
     SecretKeyDefinitionInitError,
     SecretKeyUseCase,
+    SecretKeyFlow
 )
 
 if TYPE_CHECKING:

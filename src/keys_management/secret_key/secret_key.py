@@ -74,11 +74,11 @@ class SecretKeyPair:
         return not self._is_symmetric
 
     @property
-    def decrypt_key(self) -> SecretKeyValue:
+    def back_path_key(self) -> SecretKeyValue:
         return self._decrypt_key
 
     @property
-    def encrypt_key(self) -> SecretKeyValue:
+    def forward_key(self) -> SecretKeyValue:
         return self._encrypt_key
 
 

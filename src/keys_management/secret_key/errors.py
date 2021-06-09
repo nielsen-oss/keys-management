@@ -9,7 +9,7 @@ from .consts import (
 INIT_ERR_MSG_FRMT = "Failed to init {what_to_init}: {why}"
 SECRET_KEY_ERR_MSG_FRMT = "secret_key_value type is %s"
 PAIR_INIT_ERR_MSG_FRMT = "secret_key_pair_values type is %s"
-USE_CASE_NAME_ERR_MSG_FRMT = "Failed to parse %s to SecretKeyUseCase"
+FLOW_NAME_ERR_MSG_FRMT = "Failed to parse %s to SecretKeyFlow"
 
 
 class InitError(KeysManagementError):
@@ -32,9 +32,9 @@ class SecretKeyPairInitError(InitError):
         )
 
 
-class InvalidUseCaseNameError(KeysManagementError):
+class InvalidFlowNameError(KeysManagementError):
     def __init__(self, bad_value: str) -> None:
-        super().__init__(USE_CASE_NAME_ERR_MSG_FRMT % bad_value)
+        super().__init__(FLOW_NAME_ERR_MSG_FRMT % bad_value)
 
 
 class SecretKeyDefinitionInitError(InitError):

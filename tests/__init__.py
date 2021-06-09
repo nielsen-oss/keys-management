@@ -6,6 +6,9 @@ NAME = "name"
 KEYS_STORE = "keys_store"
 KEY = "key"
 
+FORWARD_KEY = "encrypt"
+BACK_KEY = "decrypt"
+
 Keys = Union[str, Dict[str, str], Tuple]
 
 
@@ -30,7 +33,7 @@ class KeyDefForTest(BaseSecretKeyDefinition):
 
         def side_effect() -> Keys:
             if isinstance(self.keys, Dict):
-                return self.keys["encrypt"], self.keys["decrypt"]
+                return self.keys[FORWARD_KEY], self.keys[BACK_KEY]
             else:
                 return self.keys
 
@@ -43,12 +46,12 @@ class KeyDefForTest(BaseSecretKeyDefinition):
         if keys is None:
             return
         if isinstance(keys, tuple):
-            self.keys = {"encrypt": keys[0], "decrypt": keys[1]}
+            self.keys = {FORWARD_KEY: keys[0], BACK_KEY: keys[1]}
         elif isinstance(keys, (str, bytes)) and self.key_as_single:
             self.keys = keys
         else:
             self.keys = (
-                keys if isinstance(keys, dict) else {"encrypt": keys, "decrypt": keys}
+                keys if isinstance(keys, dict) else {FORWARD_KEY: keys, BACK_KEY: keys}
             )
 
     def set_next_as_keys(self, next_keys: Optional[Keys] = None) -> None:
