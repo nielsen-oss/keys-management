@@ -108,8 +108,40 @@ After KeyChanged declared, all the callbacks are executed.
 |  **OnKeyChangedCallbackErrorStrategy** 	|  Which strategy should be operated on error. <br> - RAISE_IMMEDIATELY <br>- Raise the error immediately <br>- SKIP_AND_RAISE <br>- Skip to next callback, but in the end raise an error <br>- SKIP - Skip to next callbac <br>- HALT - Halt callback executions without raising an error  |
 |  **SecretKeyDefinition**  |   set of key,values properties describing specific secret key, how it should be used and maintained<br>- store  - It's specific keysStore<br>- use_case  	-   What is the main purpose/senario/use-case. there are two options: Encryption-Decryption or AAA<br>- stateless  -   ndication if the key should be stated or not in the defined states' repository <br>- target_data_accessible -  Indication if the target data/object/client the key is processed on, can be access by the client whenever it required<br>- keep_in_cache |Indication if the key should be stated or not in the memory or any other cache tool |
 |  **CallbackStatus**       |   KeyChangedCallback status execution: PENDING, IN_PROGRESS, FAILED and SUCCEEDED	|
-|  **StateRepoInterface**	|   TODO	|
-|  **CryptoTool**	        |  TODO 	|
+|  **StateRepoInterface**	|   A KeysManagement dependency, responsible to fetch and write keys states 	|
+|  **CryptoTool**	        |   A KeysManagement dependency, responsible to decrypt and encrypt keys states 	|
+
+## Dependencies
+### StateRepoInterface
+In order to maintain the keys states, an StateRepoInterface implementation should be 
+injected to KeysManagement.  
+
+```python
+class StateRepoInterface(object):
+    def write_state(self, key: str, key_state: Any) -> None:
+        raise NotImplementedError()
+
+    def read_state(self, key: str) -> Dict:
+        raise NotImplementedError()
+```
+
+### CryptoTool
+In order to maintain the keys states with confidentiality manner, a CryptoTool interface 
+implementation should be injected to KeysManagement.  
+
+```python
+class CryptoTool(object):
+    def encrypt(self, data: Any) -> Any:
+        raise NotImplementedError()
+
+    def decrypt(self, encrypted_data: Any) -> Any:
+        raise NotImplementedError()
+```
+
+* note! - a cryptoTool eventually will need a secret key too, so think how can u use 
+  the KeysManagement to help the cryptoTool help the KeysManagement
+
+
 
 ## Examples
 ### Authtication to third_party client
