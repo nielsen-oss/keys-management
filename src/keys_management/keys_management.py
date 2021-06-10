@@ -81,8 +81,8 @@ class KeysManagement(object):
     def key_changed(
         self,
         key_name: str,
-        old_keys: StrOrBytesPair,
-        new_keys: StrOrBytesPair,
+        old_keys: Union[StrOrBytes, StrOrBytesPair],
+        new_keys: Union[StrOrBytes, StrOrBytesPair],
     ) -> None:
         raise NotImplementedError()
 

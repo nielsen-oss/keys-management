@@ -113,7 +113,6 @@ EXAMPLE2_DATA_DECRYPT_KEY = "EXAMPLE2_DATA_DECRYPT_KEY"
 
 import importlib
 
-
 def example2_key_store_asymetric_keys():
     # assume there is an app.config module
     import app.config as config_module
@@ -130,7 +129,6 @@ keys_management.define_key(
     example2_key_store_asymetric_keys,
     stateless=False,
     keep_in_cache=True,
-    target_data_accessible=True,
     use_case=SecretKeyUseCase.ROUND_TRIP,
 )
 
@@ -217,7 +215,6 @@ keys_management.define_key(
     example3_key_from_config_module,
     stateless=True,
     keep_in_cache=True,
-    target_data_accessible=True,
     use_case=SecretKeyUseCase.ROUND_TRIP,
 )
 
