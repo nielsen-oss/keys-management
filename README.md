@@ -5,18 +5,19 @@ pip package: https://pypi.org/project/keys-management/
 [![On Pull Request](https://github.com/nielsen-oss/keys-management/actions/workflows/pr_ci.yaml/badge.svg?branch=main)](https://github.com/nielsen-oss/keys-management/actions/workflows/pr_ci.yaml)
 [![Python package](https://github.com/nielsen-oss/keys-management/actions/workflows/push_ci.yaml/badge.svg?branch=main)](https://github.com/nielsen-oss/keys-management/actions/workflows/push_ci.yaml)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-keys-management is a layer tool to ease the usage of application secret keys when the 
+Keys-management is a layer tool to ease the usage of application secret keys when the 
 client's application need to meet
-strict security constraints and standards for example: secret key has one specific use case and can be rotated anytime. 
+strict security constraints and standards such as: secret key has one specific 
+use case and can be rotated anytime. 
 
 At first, it allows defining multiple secret keys, where each key can be defined from a different source.
 After keys were defined, the library helps fetch the secret key value (depends on the use case described below) and manage 
-rotation when a key is changed.
-It also provides a way for clients to maintain a state when some objects were encrypted before the application goes down
+rotation when a key should be changed.
+It also provides a way for clients to maintain states when some objects were encrypted 
+before the application goes down
 while the key can be lost or changed during the downtime.
 
 ## General Usage
@@ -25,11 +26,11 @@ while the key can be lost or changed during the downtime.
 from keys_management import KeysManagementImpl, OnChangeKeyDefinition, SecretKeyUseCase
 from unittest.mock import Mock
 
-KEY_NAME = 'my_first_key'
-value_for_key_store = 'value_1'
+KEY_NAME = "my_first_key"
+value_for_key_store = "value_1"
 
 def symmetric_key_store():
-    return current_value
+    return value_for_key_store
 
 print_mock_method = Mock()
 def on_keys_change(old_key: str, new_key: str, on_change_key_definition: 
@@ -41,24 +42,16 @@ key_definition_properties = {
     'use_case': SecretKeyUseCase.ROUND_TRIP,
     'keep_in_cache': True
 }
-```
-Create the keys_management.  
-```python
+
 keys_management = KeysManagementImpl(state_repo=Mock(), crypto_tool=Mock())
-```
 
-Define key
-
-```python
 keys_management.define_key(KEY_NAME, symmetric_key_store, **key_definition_properties)
-keys_management.register_on_change(KEY_NAME, on_keys_change)
-```
 
-Get and declare on key changes
-```python
+keys_management.register_on_change(KEY_NAME, on_keys_change)
+
 rv_key_value = keys_management.get_forward_path_key(KEY_NAME)  # expected "value_1"
 
-keys_management.key_changed(KEY_NAME, FIRST_VALUE, SECOND_VALUE)
+keys_management.key_changed(KEY_NAME, "value_1", "value_2")
 
 value_for_key_store = "value_2"  # simulate key's change
 
@@ -74,10 +67,11 @@ rv_key_value = keys_management.get_forward_path_key(KEY_NAME)  # expected "value
 pip install keys-management
 ```
 ## When to use
-Keys Management should be used when the host application needs to meet some security constraints, but still maintain flexibility and decoupling.
+Keys Management should be used when the contained application needs to meet some security 
+constraints, but still maintain flexibility and decoupling.
 
 ### Security constraints
-An application could have some security constraints in regards to using secret keys and credentials
+An application could have some security constraints in regard to using secret keys and credentials
 1. Use different key for each target object or client, so in case a specific key is stolen, all other objects are kept safe.
 2. Key can be changed or rotated at anytime, so fresh keys can be maintained all the time.
 3. When an application is crashed or exited, the keys cannot be lost so encrypted data could be decrypted.
@@ -94,9 +88,10 @@ An application could have some security constraints in regards to using secret k
 ## How to Manage keys rotation 
 The keys store is like a proxy or helper function to get the actual values. 
 Thus, the client should know when the key is going to be changed. 
-In most scenarios, when an application's administrator would like to rotate the application keys, he would like to insure
+In most scenarios, when an application's administrator would like to rotate the 
+application keys, he would like to ensure
 that the important encrypted objects that can be accessed anytime, will not be loss due the change. 
-Thus, the administrator can register callbacks to run after keys are changed. 
+To achieve it, the administrator can register callbacks to run after keys are changed. 
 Before the store is ready to be called to get the new values, KeyChanged should be called. 
 After KeyChanged declared, all the callbacks are executed. 
 
@@ -105,12 +100,12 @@ After KeyChanged declared, all the callbacks are executed.
 |   	|   	|       |
 | ---	|---	|---    |
 |  **SecretKeyUseCase** 	|  The use-case type the key is used for | <ul><li>ONE_WAY_TRIP - a case involve single flows like authentication </li><li>ROUND_TRIP - a case involve two flows like encryption-decryption</li></ul> |
-|  **SecretKeyFlow**        |  Specific use-case operation, a path inside the flow. |  <ul><li>DEFAULT - the single ONE_WAY_TRIP's flow </li> <li> FORWARD_PATH - the first ROUND_TRIP's flow like encryption </li> <li> BACK_PATH - the second ROUND_TRIP's flow like decryption | 
+|  **SecretKeyFlow**        |  Specific use-cases operation, a path involved in the use-case |  <ul><li>DEFAULT - the single ONE_WAY_TRIP's flow </li> <li> FORWARD_PATH - the first ROUND_TRIP's flow like encryption </li> <li> BACK_PATH - the second ROUND_TRIP's flow like decryption | 
 |  **SecretKeyValue**	    | A single key value wrapper that expose the value as the real value or as censored so can be used  for logging and debugging |  `"str_value" ` <br> ` b'bytes_value'`|
-|  **SecretKeyPair** 	    |  As describe, RoundTrip case involve two flows, each of them can use different value, so those values are related . Symmetric key, can be represented as a single value or tuple of two same values 	| `("forward_key_path", "back_key_path")` <br> `("symmetric_val", "symmetric_val")`|
+|  **SecretKeyPair** 	    |  RoundTrip case involve two flows, each of them can use different value, so those values are related each other. Symmetric key, can be represented as a single value or tuple of two same values 	| `("forward_key_path", "back_key_path")` <br> `("symmetric_val", "symmetric_val")`|
 |  **KeysStore**	        |  A function without arguments that its jobs to return a SecretKeyPairValues of specific target 	|<code> &nbsp;def symmetric_key_store():&nbsp;&nbsp;&nbsp;<br />&nbsp; &nbsp; return "key_value"  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code> <br /> <code> &nbsp;def symmetric_pair_key_store():&nbsp;&nbsp;&nbsp;<br />&nbsp; &nbsp; return "key_value", "key_value" &nbsp;&nbsp;&nbsp;</code> <br /> <code> &nbsp;def asymmetric_keys_store():&nbsp;&nbsp;&nbsp;<br />&nbsp; &nbsp; return "forward_value", "back_value" &nbsp;&nbsp;&nbsp;</code> |
 |  **SecretKeyState**     	|  The key's last flow is used with, and its previous SecretKeyPair  	|
-|  **KeyChangedCallback** 	|  A callback (function) that called when a key is declared that it's values were changed. the callback is called with the old and new keys and OnChangeKeyDefinition 	| <code> &nbsp;def on_keys_change(old_keys, new_keys, on_change_key_definition): <br /> &nbsp; print("key_changed") &nbsp;&nbsp;
+|  **KeyChangedCallback** 	|  A callback that called with the old and new keys and OnChangeKeyDefinition when a key is declared as changed 	| <code> &nbsp;def on_keys_change(old_keys, new_keys, on_change_key_definition): <br /> &nbsp; print("key_changed") &nbsp;&nbsp;
 |  **OnChangeKeyDefinition**|  A SecretKeyState wrapper with read access to the original key_definition  	|
 |  **OnKeyChangedCallback ErrorStrategy** 	|  Which strategy should be operated on error.  | <ul> <li> RAISE_IMMEDIATELY - Raise the error immediately </li> <li> SKIP_AND_RAISE - skip to next callback, but in the end raise an error </li> <li> SKIP - skip to next callback </li> <li>HALT - Halt callback executions without raising an error </li> </ul>
 |  **SecretKeyDefinition**  |  Set of key,values properties describing specific secret key, how it should be used and maintained | <ul><li> store - the key's keysStore </li> <li> use_case </li> <li> stateless - whether the key should be stated or not in the defined states' repository </li> <li> keep_in_cache - whether the key should be stated or not in the memory </li> </ul>
@@ -154,7 +149,9 @@ class CryptoTool(object):
 
 ## Examples
 To understand the logic behind the examples read the advanced section.  
-  
+  * application lifetime - the time when an application is going up until it is exited 
+    or crashed  
+      
 For all example it assumed that 
 ```python
 from keys_management import (KeysManagementImpl, OnChangeKeyDefinition, 
@@ -171,7 +168,6 @@ keys_management = KeysManagementImpl(state_repo=state_repo, crypto_tool=crypto_t
 A third party client who call a REST API with authorization access token.  
 The access token are passed with the KeysManagement assistant 
 
-- application lifetime - the time when an application is going up until it is exited or crashed
 
 ```python
 # 3rd_party_client.py
