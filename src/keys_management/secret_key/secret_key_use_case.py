@@ -29,4 +29,3 @@ class SecretKeyUseCase(Enum):
     ROUND_TRIP = 1
     ONE_WAY_TRIP = 2
     ENCRYPTION_DECRYPTION = 1
-    AAA = 1
