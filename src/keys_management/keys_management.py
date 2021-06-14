@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Callable, Dict, Optional, Union, cast
 from .consts import KEY, STATE, TRACE_LEVEL, TRACE_LEVEL_NAME
-from .dependecies import CryptoTool, StateRepoInterface
+from .dependecies import CryptoTool, StateRepoInterface, KeysLocker
 from .key_definitions import KeysDefnitions, DefaultKeysDefnitions
 from .errors import (
     FetchAndSetStateFromRepoError,
@@ -106,11 +106,13 @@ class KeysManagementImpl(KeysManagement):
     _state_repo: StateRepoInterface
     _crypto_tool: CryptoTool
     _keys_definitions: KeysDefnitions
+    _concurrency_synchronization: KeysLocker
     def __init__(
         self,
         state_repo: Optional[StateRepoInterface] = None,
         crypto_tool: Optional[CryptoTool] = None,
         keys_definitions: KeysDefnitions = None,
+        concurrency_synchronization: KeysLocker = None
     ):
         self._state_repo = (
             state_repo if state_repo is not None else StateRepoInterface()
@@ -118,6 +120,7 @@ class KeysManagementImpl(KeysManagement):
         self._crypto_tool = crypto_tool if crypto_tool is not None else CryptoTool()
         self._keys_definitions = keys_definitions if keys_definitions  is not None else \
             DefaultKeysDefnitions()
+        self._concurrency_synchronization = concurrency_synchronization
         self._callbacks_executions_error_handling = {
             OnKeyChangedCallbackErrorStrategy.HALT: KeysManagementImpl._on_halt_strategy,
             OnKeyChangedCallbackErrorStrategy.SKIP: KeysManagementImpl._on_skip_strategy,
@@ -153,20 +156,23 @@ class KeysManagementImpl(KeysManagement):
             on_key_changed_callback_error_strategy=on_key_changed_callback_error_strategy,
         )
         logger.debug(SUCCESS_DEFINE_KEY_LOG_FORMAT % str(key_definition))
-        self._keys_definitions[name] = key_definition
+        with self._concurrency_synchronization.write(name):
+            self._keys_definitions[name] = key_definition
         return self
 
     def get_key(self, key_name: str, flow: SecretKeyFlow = None) -> StrOrBytes:
         try:
             if not logger.isEnabledFor(logging.DEBUG):
                 logger.info(GET_KEY_INFO_FORMAT.format(key_name))
-            self._validate_key_name(key_name)
-            key_definition = self._keys_definitions[key_name]
-            flow = self._determine_flow(key_definition) if flow is None else flow
-            logger.debug(GET_KEY_DEBUG_FORMAT.format(key_name, flow.name))
-            rv_key = self._get_key_by_flow(key_definition, flow)
-            logger.debug(RV_KEY_LOG_FORMAT, str(rv_key))
-            self._update_key_definition_state(key_definition, flow)
+            with self._concurrency_synchronization.read(key_name):
+                self._validate_key_name(key_name)
+                key_definition = self._keys_definitions[key_name]
+                flow = self._determine_flow(key_definition) if flow is None else flow
+                logger.debug(GET_KEY_DEBUG_FORMAT.format(key_name, flow.name))
+                rv_key = self._get_key_by_flow(key_definition, flow)
+                logger.debug(RV_KEY_LOG_FORMAT, str(rv_key))
+            with self._concurrency_synchronization.write(key_name):
+                self._update_key_definition_state(key_definition, flow)
             return rv_key.get_value()
         except GetKeyError as e:
             raise e
