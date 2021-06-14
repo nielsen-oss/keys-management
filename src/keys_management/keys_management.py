@@ -3,6 +3,7 @@ import logging
 from typing import TYPE_CHECKING, Callable, Dict, Optional, Union, cast
 from .consts import KEY, STATE, TRACE_LEVEL, TRACE_LEVEL_NAME
 from .dependecies import CryptoTool, StateRepoInterface
+from .key_definitions import KeysDefnitions, DefaultKeysDefnitions
 from .errors import (
     FetchAndSetStateFromRepoError,
     GetKeyError,
@@ -104,27 +105,29 @@ class KeysManagement(object):
 class KeysManagementImpl(KeysManagement):
     _state_repo: StateRepoInterface
     _crypto_tool: CryptoTool
-    _keys_definitions: Dict[str, SecretKeyDefinition]
-    _callbacks_executions_error_handling: Dict[
-        OnKeyChangedCallbackErrorStrategy, Callable
-    ]
-
+    _keys_definitions: KeysDefnitions
     def __init__(
         self,
         state_repo: Optional[StateRepoInterface] = None,
         crypto_tool: Optional[CryptoTool] = None,
+        keys_definitions: KeysDefnitions = None,
     ):
         self._state_repo = (
             state_repo if state_repo is not None else StateRepoInterface()
         )
         self._crypto_tool = crypto_tool if crypto_tool is not None else CryptoTool()
-        self._keys_definitions = {}
+        self._keys_definitions = keys_definitions if keys_definitions  is not None else \
+            DefaultKeysDefnitions()
         self._callbacks_executions_error_handling = {
             OnKeyChangedCallbackErrorStrategy.HALT: KeysManagementImpl._on_halt_strategy,
             OnKeyChangedCallbackErrorStrategy.SKIP: KeysManagementImpl._on_skip_strategy,
             OnKeyChangedCallbackErrorStrategy.SKIP_AND_RAISE: KeysManagementImpl._on_skip_and_raise_strategy,
             OnKeyChangedCallbackErrorStrategy.RAISE_IMMEDIATELY: KeysManagementImpl._on_raise_strategy,
         }
+
+    _callbacks_executions_error_handling: Dict[
+        OnKeyChangedCallbackErrorStrategy, Callable
+    ]
 
     def define_key(
         self,
