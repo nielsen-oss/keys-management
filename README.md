@@ -71,26 +71,25 @@ Keys Management should be used when the contained application needs to meet some
 constraints, but still maintain flexibility and decoupling.
 
 ### Security constraints
-An application could have some security constraints in regard to using secret keys and credentials
+An application can have some security constraints in regard to using secret keys and credentials:
 1. Use different key for each target object or client, so in case a specific key is stolen, all other objects are kept safe.
 2. Key can be changed or rotated at anytime, so fresh keys can be maintained all the time.
 3. When an application is crashed or exited, the keys cannot be lost so encrypted data could be decrypted.
-4. The key content should be accessed only on demand, for example it should not even exist in memory  
+4. The key content should be accessed only on demand, for example it should not even exist in memory.  
 
 ### Flexibility and decoupling requirements
-1. Each secret key value can be originated from different source, so one can be taken from environment value, 
-   configurations files, remote service and etc.
-2. Secret key type such as Symmetric or Asymmetric can be used
-3. Multiple worker's environment application would not lead to data loss.
-4. states repo - keys and values state can be saved and restored from an external repository
-
+1. Each secret key value can be originated from different source, so one can be taken from an environment value, 
+   configurations files, remote service etc.  
+2. Secret key type such as Symmetric or Asymmetric can be used.  
+3. Multiple worker's environment application would not lead to data loss.  
+4. States repo - keys and values state can be saved and restored from an external repository.  
 
 ## How to Manage keys rotation 
 The keys store is like a proxy or helper function to get the actual values. 
 Thus, the client should know when the key is going to be changed. 
 In most scenarios, when an application's administrator would like to rotate the 
 application keys, he would like to ensure
-that the important encrypted objects that can be accessed anytime, will not be loss due the change. 
+that the important encrypted objects that can be accessed anytime, will not be lost due to that change. 
 To achieve it, the administrator can register callbacks to run after keys are changed. 
 Before the store is ready to be called to get the new values, KeyChanged should be called. 
 After KeyChanged declared, all the callbacks are executed. 
@@ -99,7 +98,7 @@ After KeyChanged declared, all the callbacks are executed.
 ## Domain terminology
 |   	|   	|       |
 | ---	|---	|---    |
-|  **SecretKeyUseCase** 	|  The use-case type the key is used for | <ul><li>ONE_WAY_TRIP - a case involve single flows like authentication </li><li>ROUND_TRIP - a case involve two flows like encryption-decryption</li></ul> |
+|  **SecretKeyUseCase** 	|  The use-case type the key is used for | <ul><li>ONE_WAY_TRIP - a case involves single flows like authentication </li><li>ROUND_TRIP - a case involves two flows like encryption-decryption</li></ul> |
 |  **SecretKeyFlow**        |  Specific use-cases operation, a path involved in the use-case |  <ul><li>DEFAULT - the single ONE_WAY_TRIP's flow </li> <li> FORWARD_PATH - the first ROUND_TRIP's flow like encryption </li> <li> BACK_PATH - the second ROUND_TRIP's flow like decryption | 
 |  **SecretKeyValue**	    | A single key value wrapper that expose the value as the real value or as censored so can be used  for logging and debugging |  `"str_value" ` <br> ` b'bytes_value'`|
 |  **SecretKeyPair** 	    |  RoundTrip case involve two flows, each of them can use different value, so those values are related each other. Symmetric key, can be represented as a single value or tuple of two same values 	| `("forward_key_path", "back_key_path")` <br> `("symmetric_val", "symmetric_val")`|
@@ -117,7 +116,7 @@ After KeyChanged declared, all the callbacks are executed.
 
 ## Dependencies
 ### StateRepoInterface
-In order to maintain the keys states, an StateRepoInterface implementation should be 
+In order to maintain the keys states, a StateRepoInterface implementation should be 
 injected to KeysManagement.  
 
 ```python
@@ -165,8 +164,8 @@ keys_management = KeysManagementImpl(state_repo=state_repo, crypto_tool=crypto_t
 ```
 
 ### Example 1 - Authentication via 3rd party client + environment based keys store 
-A third party client who call a REST API with authorization access token.  
-The access token are passed with the KeysManagement assistant 
+A third party client who calls a REST API with authorization access token.  
+The access token is passed with the KeysManagement assistant 
 
 
 ```python
@@ -228,7 +227,7 @@ second_data = client.get_data()
 ### Example 2 - High importance data + asymmetric and python module keys store based  
 * use round_trip use case as encryption-decryption, stated with caching
 * The data should not be lost anytime --> key should not be lost 
-* The data whether is encrypted or plained is always accessible
+* The data is always accessible, whether if it is encrypted or plained
 
 ```python
 
