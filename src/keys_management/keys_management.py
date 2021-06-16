@@ -2,7 +2,9 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Callable, Dict, Optional, Union, cast
 from .consts import KEY, STATE, TRACE_LEVEL, TRACE_LEVEL_NAME
-from .dependecies import CryptoTool, StateRepoInterface, KeysLocker
+from .dependecies import CryptoTool, StateRepoInterface
+from .concurrency import EnvironemtType, SynchronizerFactory, \
+    Synchronizer, DefaultSynchronizerFactory
 from .key_definitions import KeysDefnitions, DefaultKeysDefnitions
 from .errors import (
     FetchAndSetStateFromRepoError,
@@ -101,18 +103,68 @@ class KeysManagement(object):
     def save_state(self, key_name: str) -> None:
         raise NotImplementedError
 
+    def get_single_management(self, key_name: str) -> SingleKeyManagement:
+        return SingleKeyManagement(key_name, self)
+
+
+class SingleKeyManagement:
+    _name: str
+    _keys_management: KeysManagement
+
+    def __init__(self, name: str, keys_management: KeysManagement):
+        self._name = name
+        self._keys_management = keys_management
+
+    def get_key(self, flow: SecretKeyFlow) -> StrOrBytes:
+        self._keys_management.get_key(self._name, flow)
+
+    def get_forward_path_key(self) -> StrOrBytes:
+        return self._keys_management.get_key(self._name, SecretKeyFlow.FORWARD_PATH)
+
+    def get_encrypt_key(self) -> StrOrBytes:
+        return self._keys_management.get_forward_path_key(self._name)
+
+    def get_back_path_key(self) -> StrOrBytes:
+        return self._keys_management.get_key(self._name, SecretKeyFlow.BACK_PATH)
+
+    def get_decrypt_key(self) -> StrOrBytes:
+        return self._keys_management.get_back_path_key(self._name)
+
+    def key_changed(
+        self,
+        old_keys: Union[StrOrBytes, StrOrBytesPair],
+        new_keys: Union[StrOrBytes, StrOrBytesPair],
+    ) -> None:
+        self._keys_management.key_changed(self._name, old_keys, new_keys)
+
+    def register_on_change(
+        self,
+        on_change_func: KeyChangedCallback,
+        callback_id: str = None,
+    ) -> None:
+        self._keys_management.register_on_change(self._name, on_change_func, callback_id)
+
+    def save_state(self) -> None:
+        self._keys_management.save_state(self._name)
+
 
 class KeysManagementImpl(KeysManagement):
     _state_repo: StateRepoInterface
     _crypto_tool: CryptoTool
     _keys_definitions: KeysDefnitions
-    _concurrency_synchronization: KeysLocker
+    _synchronizer_factory: SynchronizerFactory
+    _synchronizers: Dict[str, Synchronizer]
+    _callbacks_executions_error_handling: Dict[
+        OnKeyChangedCallbackErrorStrategy, Callable
+    ]
+
     def __init__(
         self,
         state_repo: Optional[StateRepoInterface] = None,
         crypto_tool: Optional[CryptoTool] = None,
         keys_definitions: KeysDefnitions = None,
-        concurrency_synchronization: KeysLocker = None
+        environemt_type: EnvironemtType = EnvironemtType.SINGLE,
+        synchronizer_factory: SynchronizerFactory = None,
     ):
         self._state_repo = (
             state_repo if state_repo is not None else StateRepoInterface()
@@ -120,17 +172,16 @@ class KeysManagementImpl(KeysManagement):
         self._crypto_tool = crypto_tool if crypto_tool is not None else CryptoTool()
         self._keys_definitions = keys_definitions if keys_definitions  is not None else \
             DefaultKeysDefnitions()
-        self._concurrency_synchronization = concurrency_synchronization
+        self._synchronizer_factory = synchronizer_factory if synchronizer_factory is \
+                                                              not None else \
+            DefaultSynchronizerFactory(environemt_type)
+        self._synchronizers = {}
         self._callbacks_executions_error_handling = {
             OnKeyChangedCallbackErrorStrategy.HALT: KeysManagementImpl._on_halt_strategy,
             OnKeyChangedCallbackErrorStrategy.SKIP: KeysManagementImpl._on_skip_strategy,
             OnKeyChangedCallbackErrorStrategy.SKIP_AND_RAISE: KeysManagementImpl._on_skip_and_raise_strategy,
             OnKeyChangedCallbackErrorStrategy.RAISE_IMMEDIATELY: KeysManagementImpl._on_raise_strategy,
         }
-
-    _callbacks_executions_error_handling: Dict[
-        OnKeyChangedCallbackErrorStrategy, Callable
-    ]
 
     def define_key(
         self,
@@ -155,8 +206,9 @@ class KeysManagementImpl(KeysManagement):
             keep_in_cache=keep_in_cache,
             on_key_changed_callback_error_strategy=on_key_changed_callback_error_strategy,
         )
+        self._synchronizers[name] = self._synchronizer_factory.create()
         logger.debug(SUCCESS_DEFINE_KEY_LOG_FORMAT % str(key_definition))
-        with self._concurrency_synchronization.write(name):
+        with self._synchronizers[name].write():
             self._keys_definitions[name] = key_definition
         return self
 
@@ -164,14 +216,14 @@ class KeysManagementImpl(KeysManagement):
         try:
             if not logger.isEnabledFor(logging.DEBUG):
                 logger.info(GET_KEY_INFO_FORMAT.format(key_name))
-            with self._concurrency_synchronization.read(key_name):
-                self._validate_key_name(key_name)
+            self._validate_key_name(key_name)
+            with self._synchronizers[key_name].read():
                 key_definition = self._keys_definitions[key_name]
                 flow = self._determine_flow(key_definition) if flow is None else flow
                 logger.debug(GET_KEY_DEBUG_FORMAT.format(key_name, flow.name))
                 rv_key = self._get_key_by_flow(key_definition, flow)
                 logger.debug(RV_KEY_LOG_FORMAT, str(rv_key))
-            with self._concurrency_synchronization.write(key_name):
+            with self._synchronizers[key_name].write():
                 self._update_key_definition_state(key_definition, flow)
             return rv_key.get_value()
         except GetKeyError as e:
@@ -379,6 +431,7 @@ class KeysManagementImpl(KeysManagement):
             ],
             old_keys,
             new_keys,
+            self._synchronizers[key_definition.name]
         )
 
     def register_on_change(
