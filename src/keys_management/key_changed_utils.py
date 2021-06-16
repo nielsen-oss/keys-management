@@ -4,6 +4,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 from .errors import KeyChangedError, OnKeyChangedCallbackErrorStrategy
 from .on_change_key_definition import OnChangeKeyDefinition
+from .concurrency import Synchronizer
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ class KeyChangedContext:
     _has_error: bool
     _old_keys: Optional[Union[StrOrBytes, StrOrBytesPair]]
     _new_keys: Optional[Union[StrOrBytes, StrOrBytesPair]]
+    _synchronizer: Synchronizer
 
     def __init__(
         self,
@@ -48,6 +50,7 @@ class KeyChangedContext:
         on_error_strategy: Callable[..., None],
         old_keys: Optional[Union[StrOrBytes, StrOrBytesPair]],
         new_keys: Optional[Union[StrOrBytes, StrOrBytesPair]],
+        synchronizer: Synchronizer
     ) -> None:
         self._key_name = key_definition.name
         self._on_change_key_definition = OnChangeKeyDefinition(key_definition)
@@ -59,6 +62,7 @@ class KeyChangedContext:
         self._old_keys = old_keys
         self._new_keys = new_keys
         self._has_error = False
+        self._synchronizer = synchronizer
 
     def __getitem__(self, item: str) -> Any:
         return self._callbacks[item]
@@ -81,11 +85,12 @@ class KeyChangedContext:
             try:
                 logger.info('Going to execute the callback "%s"' % callback_name)
                 callback_ctx["status"] = CallbackStatus.IN_PROGRESS
-                callback_ctx["callback"](
-                    self._old_keys,
-                    self._new_keys,
-                    self._on_change_key_definition,
-                )
+                with self._synchronizer.write():
+                    callback_ctx["callback"](
+                        self._old_keys,
+                        self._new_keys,
+                        self._on_change_key_definition,
+                    )
                 callback_ctx["status"] = CallbackStatus.SUCCEEDED
             except Exception as e:
                 self._has_error = True
