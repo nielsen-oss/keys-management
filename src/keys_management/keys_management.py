@@ -232,7 +232,6 @@ class KeysManagementImpl(KeysManagement):
             raise GetKeyError(key_name) from e
 
     def _validate_key_name(self, key_name: str) -> None:
-        logger.info(REGISTER_ON_CHANGE_LOG_FORMAT % key_name)
         if key_name not in self._keys_definitions:
             raise KeyIsNotDefinedError(key_name)
 
