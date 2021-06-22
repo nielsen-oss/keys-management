@@ -79,10 +79,10 @@ class DefaultSynchronizer(Synchronizer):
 
 
 class SynchronizerFactory:
-    def create(self) -> ReadWriteSynchronizer:
+    def create(self) -> Synchronizer:
         raise NotImplementedError()
 
-    def __ceil__(self) -> ReadWriteSynchronizer:
+    def __ceil__(self) -> Synchronizer:
         return self.create()
 
 
@@ -106,5 +106,5 @@ class DefaultSynchronizerFactory:
         else:
             return DefaultSynchronizer(multiprocessing.Lock())
 
-    def __ceil__(self) -> ReadWriteSynchronizer:
+    def __ceil__(self) -> Synchronizer:
         return self.create()

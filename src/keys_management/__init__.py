@@ -20,6 +20,8 @@ from .secret_key import (
     SecretKeyUseCase,
 )
 
+from .concurrency import EnvironemtType, SynchronizerFactory, Synchronizer
+
 if TYPE_CHECKING:
     from .key_changed_utils import KeyChangedCallback
     from .secret_key import KeysStore, StrOrBytes, StrOrBytesPair
