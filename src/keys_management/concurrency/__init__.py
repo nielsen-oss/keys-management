@@ -86,7 +86,7 @@ class SynchronizerFactory:
         return self.create()
 
 
-class EnvironemtType:
+class EnvironemtType(Enum):
     SINGLE = 1
     MULTITHREADED = 2
     MULTIPROCESS = 3
